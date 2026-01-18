@@ -162,7 +162,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -185,10 +186,12 @@ import {
   CheckCircle2,
   Upload,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import type { DataSource } from '@/types';
 
 export default function ConnectPage() {
+  const searchParams = useSearchParams();
   const [dataSources, setDataSources] = useState<DataSource[]>([
     { id: '1', platform: 'google', connected: false },
     { id: '2', platform: 'microsoft', connected: false },
@@ -197,13 +200,48 @@ export default function ConnectPage() {
 
   const [isSlackDialogOpen, setIsSlackDialogOpen] = useState(false);
   const [slackApiKey, setSlackApiKey] = useState('');
+  const [isConnecting, setIsConnecting] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Handle OAuth callback messages
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+
+    if (success === 'google_connected') {
+      setMessage({ type: 'success', text: 'Google Workspace connected successfully!' });
+      setDataSources(prev => prev.map(ds => 
+        ds.platform === 'google' ? { ...ds, connected: true } : ds
+      ));
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        oauth_denied: 'You denied access to Google Workspace',
+        missing_params: 'OAuth callback missing parameters',
+        config_error: 'Google OAuth not configured properly',
+        token_exchange_failed: 'Failed to exchange authorization code',
+        userinfo_failed: 'Failed to get Google user info',
+        callback_failed: 'OAuth callback failed',
+      };
+      setMessage({ type: 'error', text: errorMessages[error] || 'Connection failed' });
+    }
+
+    // Clear message after 5 seconds
+    if (success || error) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   const handleConnect = async (platform: string) => {
     if (platform === 'slack') {
       setIsSlackDialogOpen(true);
-    } else {
-      // TODO: Call API to initiate OAuth flow for other platforms
-      console.log(`Connecting to ${platform}`);
+    } else if (platform === 'google') {
+      setIsConnecting('google');
+      // Redirect to Google OAuth
+      window.location.href = '/api/auth/google';
+    } else if (platform === 'microsoft') {
+      // TODO: Implement Microsoft OAuth
+      setMessage({ type: 'error', text: 'Microsoft 365 integration coming soon!' });
     }
   };
 
@@ -251,10 +289,26 @@ export default function ConnectPage() {
         <div className="space-y-2">
           <h1 className="text-4xl font-semibold">Connect Your Data Sources</h1>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Unify analyses your organisation's historical communications to extract
+            Unify analyses your organisation&apos;s historical communications to extract
             institutional knowledge. All connections are read-only and secure.
           </p>
         </div>
+
+        {/* Status Message */}
+        {message && (
+          <div className={`p-4 rounded-lg flex items-center gap-3 ${
+            message.type === 'success' 
+              ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' 
+              : 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+          }`}>
+            {message.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : (
+              <AlertCircle className="h-5 w-5" />
+            )}
+            <span>{message.text}</span>
+          </div>
+        )}
 
         {/* Connection Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -303,8 +357,16 @@ export default function ConnectPage() {
                     <Button
                       onClick={() => handleConnect(source.platform)}
                       className="w-full"
+                      disabled={isConnecting === source.platform}
                     >
-                      Connect
+                      {isConnecting === source.platform ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        'Connect'
+                      )}
                     </Button>
                   )}
                 </CardContent>
