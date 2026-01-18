@@ -24,7 +24,6 @@ export default function SignUpOrganisationPage() {
           path="/signup/organisation"
           signInUrl="/signin"
           afterSignUpUrl="/onboarding?type=organisation"
-          requiredFields={['firstName', 'lastName']}
         />
 
         <p className="text-sm text-center text-slate-500 dark:text-slate-400 mt-6">
