@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TrendingUp, Users, DollarSign, Calendar, Award } from 'lucide-react';
+import { mockStatistics } from '@/lib/mockData';
 
 export default function InsightsPage() {
   return (
@@ -22,7 +23,7 @@ export default function InsightsPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">47</div>
+            <div className="text-2xl font-bold">{mockStatistics.totalEvents}</div>
             <p className="text-xs text-muted-foreground">+12% from last year</p>
           </CardContent>
         </Card>
@@ -33,7 +34,7 @@ export default function InsightsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">68</div>
+            <div className="text-2xl font-bold">{mockStatistics.avgAttendance}</div>
             <p className="text-xs text-muted-foreground">+8% from last year</p>
           </CardContent>
         </Card>
@@ -44,8 +45,8 @@ export default function InsightsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">£142K</div>
-            <p className="text-xs text-muted-foreground">+23% from last year</p>
+            <div className="text-2xl font-bold">€{(mockStatistics.totalFundraisingRaised / 1000).toFixed(0)}K</div>
+            <p className="text-xs text-muted-foreground">+18% from last year</p>
           </CardContent>
         </Card>
 
@@ -55,7 +56,7 @@ export default function InsightsPage() {
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4.3</div>
+            <div className="text-2xl font-bold">{mockStatistics.avgRating}</div>
             <p className="text-xs text-muted-foreground">+0.2 from last year</p>
           </CardContent>
         </Card>
@@ -80,7 +81,7 @@ export default function InsightsPage() {
               <div className="text-center text-slate-500">
                 <TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-20" />
                 <p className="text-sm">Chart visualisation with Recharts</p>
-                <p className="text-xs mt-2">Line chart showing attendance trends by quarter</p>
+                <p className="text-xs mt-2">Line chart showing attendance trends by semester</p>
               </div>
             </CardContent>
           </Card>
@@ -90,13 +91,13 @@ export default function InsightsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Budget Performance</CardTitle>
-              <CardDescription>Planned vs Actual spending by quarter</CardDescription>
+              <CardDescription>Planned vs Actual spending by semester</CardDescription>
             </CardHeader>
             <CardContent className="h-80 flex items-center justify-center">
               <div className="text-center text-slate-500">
                 <DollarSign className="h-16 w-16 mx-auto mb-4 opacity-20" />
                 <p className="text-sm">Chart visualisation with Recharts</p>
-                <p className="text-xs mt-2">Bar chart comparing planned vs actual budgets</p>
+                <p className="text-xs mt-2">Bar chart comparing planned vs actual budgets by semester</p>
               </div>
             </CardContent>
           </Card>
@@ -153,7 +154,7 @@ export default function InsightsPage() {
             </div>
             <div className="flex items-start gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-600 mt-2" />
-              <p>Social events in Q1 have 40% higher attendance than other quarters</p>
+              <p>Social events in Semester 1 have 40% higher attendance than Semester 2</p>
             </div>
             <div className="flex items-start gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-600 mt-2" />
@@ -171,7 +172,7 @@ export default function InsightsPage() {
           <CardContent className="space-y-2 text-sm">
             <div className="flex items-start gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-600 mt-2" />
-              <p>Budget variance averaging 8% - need tighter cost control</p>
+              <p>Budget variance averaging 6% - maintain tight cost control</p>
             </div>
             <div className="flex items-start gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-600 mt-2" />
@@ -179,7 +180,7 @@ export default function InsightsPage() {
             </div>
             <div className="flex items-start gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-600 mt-2" />
-              <p>Q2 has 30% fewer events - opportunity to increase engagement</p>
+              <p>Semester 2 has fewer events - opportunity to increase spring engagement</p>
             </div>
           </CardContent>
         </Card>

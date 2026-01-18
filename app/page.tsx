@@ -13,8 +13,7 @@ import {
   Mail,
   FileText,
   MessageSquare,
-  Github,
-  Twitter,
+  Instagram,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -23,23 +22,34 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl md:text-6xl font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
-            Institutional memory that never graduates
-          </h1>
+          <div className="mb-4">
+            <h1 className="text-6xl md:text-7xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-4">
+              Unify
+            </h1>
+            <p className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 font-medium">
+              Institutional memory that never graduates
+            </p>
+          </div>
           <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
             When your entire committee changes annually, institutional knowledge
             shouldn't vanish. Unify preserves what matters—automatically.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button size="lg" className="text-lg px-8" asChild>
-              <Link href="/signup">
-                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href="/signup/organisation">
+                Create Organisation <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8" asChild>
-              <Link href="#how-it-works">See How It Works</Link>
+              <Link href="/signup/member">Join Organisation</Link>
             </Button>
           </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Already have an account?{' '}
+            <Link href="/signin" className="text-cyan-600 hover:underline dark:text-cyan-400">
+              Sign in
+            </Link>
+          </p>
         </div>
 
         {/* Visual Mockup Placeholder */}
@@ -209,13 +219,15 @@ export default function LandingPage() {
             Start preserving your institutional memory
           </h2>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            No credit card required • 5 minutes to set up
+            5 minutes to set up • Built for student organisations
           </p>
-          <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-            <Link href="/signup">
-              Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
+              <Link href="/signup/organisation">
+                Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -238,18 +250,18 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="/pricing"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
-                  >
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href="/about"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
                   >
                     About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
+                  >
+                    Contact
                   </Link>
                 </li>
               </ul>
@@ -283,16 +295,24 @@ export default function LandingPage() {
               </h4>
               <div className="flex gap-4">
                 <Link
-                  href="https://github.com"
+                  href="https://instagram.com/unify"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
+                  aria-label="Instagram"
                 >
-                  <Github className="h-5 w-5" />
+                  <Instagram className="h-5 w-5" />
                 </Link>
                 <Link
-                  href="https://twitter.com"
+                  href="https://tiktok.com/@unify"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
+                  aria-label="TikTok"
                 >
-                  <Twitter className="h-5 w-5" />
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                  </svg>
                 </Link>
               </div>
             </div>

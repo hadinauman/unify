@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,17 +15,28 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const signupType = searchParams.get('type'); // 'organisation' or 'member'
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     orgName: '',
     orgType: '',
+    orgSubtype: '',
     membersCount: '',
     foundedYear: new Date().getFullYear().toString(),
-    yourRole: '',
+    yourRole: signupType === 'organisation' ? 'president' : '',
     committeeYear: '',
+    selectedOrg: '', // For member signup
   });
+
+  useEffect(() => {
+    // If signing up as member, skip step 1 (org creation)
+    if (signupType === 'member') {
+      setStep(2);
+    }
+  }, [signupType]);
 
   const handleSubmit = () => {
     // TODO: Save organisation data to backend
@@ -39,7 +50,9 @@ export default function OnboardingPage() {
         <CardHeader>
           <CardTitle className="text-3xl">Welcome to Unify</CardTitle>
           <p className="text-slate-600 dark:text-slate-400">
-            Let's set up your organisation
+            {signupType === 'organisation'
+              ? "Let's set up your organisation"
+              : "Let's get you connected to your organisation"}
           </p>
           <div className="flex gap-2 mt-4">
             <div
@@ -61,13 +74,13 @@ export default function OnboardingPage() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {step === 1 && (
+          {step === 1 && signupType === 'organisation' && (
             <div className="space-y-4">
               <div>
                 <Label htmlFor="orgName">Organisation Name</Label>
                 <Input
                   id="orgName"
-                  placeholder="Trinity College Dublin ISoc"
+                  placeholder="e.g., TCD MSA"
                   value={formData.orgName}
                   onChange={(e) =>
                     setFormData({ ...formData, orgName: e.target.value })
@@ -88,32 +101,44 @@ export default function OnboardingPage() {
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="isoc">ISoc</SelectItem>
-                    <SelectItem value="msa">MSA</SelectItem>
                     <SelectItem value="student-org">Student Organisation</SelectItem>
-                    <SelectItem value="nonprofit">Nonprofit Chapter</SelectItem>
+                    <SelectItem value="nonprofit">Nonprofit</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {formData.orgType === 'student-org' && (
+                <div>
+                  <Label htmlFor="orgSubtype">Subtype</Label>
+                  <Select
+                    value={formData.orgSubtype}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, orgSubtype: value })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select subtype" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="isoc-msa">ISOC/MSA</SelectItem>
+                      <SelectItem value="other">Other Society</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="membersCount">Estimated Members</Label>
-                <Select
+                <Input
+                  id="membersCount"
+                  type="number"
+                  placeholder="e.g., 180"
                   value={formData.membersCount}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, membersCount: value })
+                  onChange={(e) =>
+                    setFormData({ ...formData, membersCount: e.target.value })
                   }
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="<50">&lt; 50</SelectItem>
-                    <SelectItem value="50-100">50-100</SelectItem>
-                    <SelectItem value="100-200">100-200</SelectItem>
-                    <SelectItem value="200+">200+</SelectItem>
-                  </SelectContent>
-                </Select>
+                  className="mt-1"
+                />
               </div>
 
               <div>
@@ -121,7 +146,7 @@ export default function OnboardingPage() {
                 <Input
                   id="foundedYear"
                   type="number"
-                  placeholder="2020"
+                  placeholder="e.g., 1997"
                   value={formData.foundedYear}
                   onChange={(e) =>
                     setFormData({ ...formData, foundedYear: e.target.value })
@@ -142,6 +167,27 @@ export default function OnboardingPage() {
 
           {step === 2 && (
             <div className="space-y-4">
+              {signupType === 'member' && (
+                <div>
+                  <Label htmlFor="selectedOrg">Select Organisation</Label>
+                  <Select
+                    value={formData.selectedOrg}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, selectedOrg: value })
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Choose your organisation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tcd-msa">TCD MSA</SelectItem>
+                      <SelectItem value="ucd-msa">UCD MSA</SelectItem>
+                      <SelectItem value="dcu-isoc">DCU Islamic Society</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="yourRole">Your Committee Role</Label>
                 <Select
@@ -149,26 +195,39 @@ export default function OnboardingPage() {
                   onValueChange={(value) =>
                     setFormData({ ...formData, yourRole: value })
                   }
+                  disabled={signupType === 'organisation'}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="president">President</SelectItem>
-                    <SelectItem value="treasurer">Treasurer</SelectItem>
-                    <SelectItem value="events">Events Coordinator</SelectItem>
-                    <SelectItem value="social">Social Secretary</SelectItem>
-                    <SelectItem value="publicity">Publicity Officer</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    {signupType === 'organisation' && (
+                      <SelectItem value="president">President</SelectItem>
+                    )}
+                    {signupType === 'member' && (
+                      <>
+                        <SelectItem value="treasurer">Treasurer</SelectItem>
+                        <SelectItem value="security">Security</SelectItem>
+                        <SelectItem value="events">Events Coordinator</SelectItem>
+                        <SelectItem value="social">Social Secretary</SelectItem>
+                        <SelectItem value="publicity">Publicity Officer</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
+                {signupType === 'organisation' && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    As organisation creator, you are automatically assigned as President
+                  </p>
+                )}
               </div>
 
               <div>
                 <Label htmlFor="committeeYear">Committee Year</Label>
                 <Input
                   id="committeeYear"
-                  placeholder="2024-2025"
+                  placeholder="2025-2026"
                   value={formData.committeeYear}
                   onChange={(e) =>
                     setFormData({ ...formData, committeeYear: e.target.value })
@@ -177,20 +236,34 @@ export default function OnboardingPage() {
                 />
               </div>
 
+              {signupType === 'member' && (
+                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
+                  <p className="text-sm text-blue-900 dark:text-blue-200">
+                    ⚠️ Your join request will be sent to the President for approval
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-2">
-                <Button
-                  onClick={() => setStep(1)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                </Button>
+                {signupType === 'organisation' && (
+                  <Button
+                    onClick={() => setStep(1)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                  </Button>
+                )}
                 <Button
                   onClick={() => setStep(3)}
-                  className="flex-1"
-                  disabled={!formData.yourRole}
+                  className={signupType === 'organisation' ? 'flex-1' : 'w-full'}
+                  disabled={
+                    !formData.yourRole ||
+                    (signupType === 'member' && !formData.selectedOrg)
+                  }
                 >
-                  Continue <ArrowRight className="ml-2 h-4 w-4" />
+                  {signupType === 'member' ? 'Send Request' : 'Continue'}{' '}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -222,5 +295,21 @@ export default function OnboardingPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl">
+          <CardContent className="p-12 text-center">
+            <p className="text-slate-500">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
   );
 }

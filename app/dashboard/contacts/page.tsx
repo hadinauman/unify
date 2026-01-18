@@ -27,67 +27,7 @@ import {
   GraduationCap,
   Users as UsersIcon,
 } from 'lucide-react';
-
-const mockContacts = [
-  {
-    id: '1',
-    name: 'Halal Bros Catering',
-    type: 'vendor',
-    email: 'info@halalbros.ie',
-    phone: '+353 1 234 5678',
-    website: 'https://halalbros.ie',
-    description: 'Professional halal catering service',
-    notes: '2-week lead time needed, offers ISoc discount, excellent quality',
-    rating: 5,
-    eventsUsed: ['Charity Week 2024', 'Ramadan Iftar', 'Eid Celebration'],
-    lastContactedAt: '2024-04-15',
-    relationshipStrength: 'strong',
-    tags: ['food', 'catering', 'halal', 'reliable'],
-  },
-  {
-    id: '2',
-    name: 'Dr. Fatima Ahmed',
-    type: 'speaker',
-    email: 'f.ahmed@university.ie',
-    phone: '+353 1 987 6543',
-    description: 'Islamic Studies professor, frequently speaks at events',
-    notes: 'Prefers evening events, needs 1-month notice',
-    rating: 5,
-    eventsUsed: ['Freshers Talk', 'Islamic Awareness Week'],
-    lastContactedAt: '2024-09-01',
-    relationshipStrength: 'strong',
-    tags: ['speaker', 'academic', 'islamic-studies'],
-  },
-  {
-    id: '3',
-    name: 'Dublin Event Rentals',
-    type: 'vendor',
-    email: 'bookings@dublinhire.ie',
-    phone: '+353 1 555 1234',
-    website: 'https://dublinhire.ie',
-    description: 'Event equipment and furniture rental',
-    notes: 'Good prices, sometimes late on delivery',
-    rating: 3,
-    eventsUsed: ['Charity Week 2024'],
-    lastContactedAt: '2024-03-10',
-    relationshipStrength: 'moderate',
-    tags: ['vendor', 'equipment', 'furniture'],
-  },
-  {
-    id: '4',
-    name: 'Muslim Relief UK',
-    type: 'partner',
-    email: 'partnerships@muslimrelief.uk',
-    website: 'https://muslimrelief.org.uk',
-    description: 'Charity partner for fundraising events',
-    notes: 'Excellent partnership, provides promotional materials',
-    rating: 5,
-    eventsUsed: ['Charity Week 2024', 'Charity Week 2023'],
-    lastContactedAt: '2024-02-20',
-    relationshipStrength: 'strong',
-    tags: ['charity', 'partner', 'fundraising'],
-  },
-];
+import { mockContacts } from '@/lib/mockData';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState(mockContacts);

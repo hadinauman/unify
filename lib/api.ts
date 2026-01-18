@@ -11,7 +11,7 @@ import type {
 } from '@/types';
 
 // Base configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // Helper function for authenticated requests
 async function fetchWithAuth(
@@ -26,8 +26,8 @@ async function fetchWithAuth(
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
     },
   });
 }

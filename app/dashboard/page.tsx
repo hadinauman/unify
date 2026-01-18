@@ -20,59 +20,26 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, DollarSign, Star, TrendingUp } from 'lucide-react';
-
-// Mock data
-const mockEvents = [
-  {
-    id: '1',
-    title: 'Charity Week 2024',
-    date: '2024-03-15',
-    endDate: '2024-03-22',
-    type: 'fundraiser',
-    attendance: 240,
-    fundraising: 52000,
-    rating: 5,
-    budget: { planned: 5000, actual: 4732 },
-    tags: ['major-event', 'fundraising', 'community'],
-  },
-  {
-    id: '2',
-    title: 'Ramadan Iftar Series',
-    date: '2024-04-02',
-    endDate: '2024-04-28',
-    type: 'social',
-    attendance: 120,
-    rating: 4,
-    budget: { planned: 3000, actual: 2950 },
-    tags: ['ramadan', 'community', 'food'],
-  },
-  {
-    id: '3',
-    title: 'Freshers Welcome 2024',
-    date: '2024-09-10',
-    type: 'social',
-    attendance: 85,
-    rating: 4,
-    budget: { planned: 1500, actual: 1620 },
-    tags: ['freshers', 'orientation'],
-  },
-];
+import { mockEvents, mockStatistics } from '@/lib/mockData';
 
 export default function TimelinePage() {
   const [selectedYear, setSelectedYear] = useState('2024');
+  const [selectedSemester, setSelectedSemester] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
 
   const filteredEvents = mockEvents.filter((event) => {
     const matchesYear = event.date.startsWith(selectedYear);
     const matchesType = selectedType === 'all' || event.type === selectedType;
-    return matchesYear && matchesType;
+    const matchesSemester = selectedSemester === 'all' || event.semester === selectedSemester;
+    return matchesYear && matchesType && matchesSemester;
   });
 
   const typeColors = {
     fundraiser: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400',
     social: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400',
     educational: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400',
+    religious: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400',
   };
 
   return (
@@ -93,9 +60,20 @@ export default function TimelinePage() {
               <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="2025">2025</SelectItem>
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Semester" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Semesters</SelectItem>
+              <SelectItem value="semester-1">Semester 1 (Sep-Dec)</SelectItem>
+              <SelectItem value="semester-2">Semester 2 (Jan-May)</SelectItem>
             </SelectContent>
           </Select>
 
@@ -108,6 +86,7 @@ export default function TimelinePage() {
               <SelectItem value="fundraiser">Fundraiser</SelectItem>
               <SelectItem value="social">Social</SelectItem>
               <SelectItem value="educational">Educational</SelectItem>
+              <SelectItem value="religious">Religious</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -115,15 +94,15 @@ export default function TimelinePage() {
         {/* Stats Cards */}
         <div className="flex gap-4">
           <div className="text-center">
-            <div className="text-2xl font-semibold">47</div>
+            <div className="text-2xl font-semibold">{mockStatistics.totalEvents}</div>
             <div className="text-xs text-slate-500">Total Events</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-semibold">68</div>
+            <div className="text-2xl font-semibold">{mockStatistics.avgAttendance}</div>
             <div className="text-xs text-slate-500">Avg Attendance</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-semibold">£142K</div>
+            <div className="text-2xl font-semibold">€{(mockStatistics.totalFundraisingRaised / 1000).toFixed(0)}K</div>
             <div className="text-xs text-slate-500">Total Raised</div>
           </div>
         </div>
@@ -167,7 +146,7 @@ export default function TimelinePage() {
                         {event.fundraising && (
                           <div className="flex items-center gap-1">
                             <DollarSign className="h-4 w-4" />
-                            £{(event.fundraising / 1000).toFixed(0)}K raised
+                            €{(event.fundraising / 1000).toFixed(0)}K raised
                           </div>
                         )}
                       </div>
@@ -219,7 +198,7 @@ export default function TimelinePage() {
                         <div className="flex justify-between">
                           <span className="text-slate-600 dark:text-slate-400">Fundraised:</span>
                           <span className="font-semibold text-emerald-600">
-                            £{event.fundraising.toLocaleString()}
+                            €{event.fundraising.toLocaleString()}
                           </span>
                         </div>
                       )}
@@ -253,7 +232,7 @@ export default function TimelinePage() {
                           <div className="text-center">
                             <p className="text-sm text-slate-600 dark:text-slate-400">Planned</p>
                             <p className="text-2xl font-semibold">
-                              £{event.budget.planned.toLocaleString()}
+                              €{event.budget.planned.toLocaleString()}
                             </p>
                           </div>
                         </CardContent>
@@ -263,7 +242,7 @@ export default function TimelinePage() {
                           <div className="text-center">
                             <p className="text-sm text-slate-600 dark:text-slate-400">Actual</p>
                             <p className="text-2xl font-semibold">
-                              £{event.budget.actual.toLocaleString()}
+                              €{event.budget.actual.toLocaleString()}
                             </p>
                           </div>
                         </CardContent>
@@ -273,7 +252,7 @@ export default function TimelinePage() {
                           <div className="text-center">
                             <p className="text-sm text-slate-600 dark:text-slate-400">Variance</p>
                             <p className="text-2xl font-semibold text-emerald-600">
-                              -£{(event.budget.planned - event.budget.actual).toLocaleString()}
+                              -€{(event.budget.planned - event.budget.actual).toLocaleString()}
                             </p>
                           </div>
                         </CardContent>

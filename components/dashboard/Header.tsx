@@ -17,8 +17,8 @@ export function DashboardHeader() {
             <span className="text-white font-semibold text-sm">U</span>
           </div>
           <div>
-            <h1 className="font-semibold text-lg">Trinity College ISoc</h1>
-            <p className="text-xs text-slate-500">2024-2025</p>
+            <h1 className="font-semibold text-lg">TCD MSA</h1>
+            <p className="text-xs text-slate-500">2025-2026</p>
           </div>
         </div>
 
