@@ -3,7 +3,7 @@
 export interface Organisation {
   id: string;
   name: string;
-  type: 'isoc' | 'msa' | 'student-org' | 'nonprofit';
+  type: 'isoc' | 'msa' | 'student-org' | 'nonprofit' | 'commercial';
   membersCount: number;
   foundedYear: number;
   createdAt: string;

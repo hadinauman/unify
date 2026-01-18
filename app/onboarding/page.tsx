@@ -103,6 +103,7 @@ function OnboardingContent() {
                   <SelectContent>
                     <SelectItem value="student-org">Student Organisation</SelectItem>
                     <SelectItem value="nonprofit">Nonprofit</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

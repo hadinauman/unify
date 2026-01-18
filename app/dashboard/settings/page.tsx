@@ -81,6 +81,7 @@ export default function SettingsPage() {
                   <SelectContent>
                     <SelectItem value="student-org">Student Organisation</SelectItem>
                     <SelectItem value="nonprofit">Nonprofit Chapter</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
