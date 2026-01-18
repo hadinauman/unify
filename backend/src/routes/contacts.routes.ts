@@ -1,13 +1,23 @@
 import express from 'express';
 import { demoContacts } from '../services/demoData';
+import { getSyncedContacts } from '../services/sync/sync.service';
 
 const router = express.Router();
 
 // Get all contacts with optional filters
 router.get('/', (req, res) => {
-  const { type, rating } = req.query;
+  const { type, rating, source } = req.query;
 
-  let filtered = [...demoContacts];
+  // Combine demo contacts with synced contacts
+  const syncedContacts = getSyncedContacts();
+  let filtered = [...demoContacts, ...syncedContacts];
+
+  // Filter by source if specified
+  if (source === 'synced') {
+    filtered = syncedContacts;
+  } else if (source === 'demo') {
+    filtered = [...demoContacts];
+  }
 
   if (type && type !== 'all') {
     // Support comma-separated types

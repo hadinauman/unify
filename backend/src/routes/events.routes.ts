@@ -1,13 +1,23 @@
 import express from 'express';
 import { demoEvents, demoStatistics } from '../services/demoData';
+import { getSyncedEvents } from '../services/sync/sync.service';
 
 const router = express.Router();
 
 // Get all events with optional filters
 router.get('/', (req, res) => {
-  const { year, type, semester } = req.query;
+  const { year, type, semester, source } = req.query;
 
-  let filtered = [...demoEvents];
+  // Combine demo events with synced events
+  const syncedEvents = getSyncedEvents();
+  let filtered = [...demoEvents, ...syncedEvents];
+
+  // Filter by source if specified
+  if (source === 'synced') {
+    filtered = syncedEvents;
+  } else if (source === 'demo') {
+    filtered = [...demoEvents];
+  }
 
   if (year) {
     filtered = filtered.filter((e) => e.date.startsWith(year as string));
@@ -18,7 +28,7 @@ router.get('/', (req, res) => {
   }
 
   if (semester && semester !== 'all') {
-    filtered = filtered.filter((e) => e.semester === semester);
+    filtered = filtered.filter((e) => 'semester' in e && e.semester === semester);
   }
 
   // Sort by date descending (most recent first)

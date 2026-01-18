@@ -17,15 +17,25 @@ import {
 import { Link2, Users, Bell, Shield, Building, Upload, AlertTriangle, Loader2, Check, X } from 'lucide-react';
 import { api } from '@/lib/api';
 
+interface SyncStatus {
+  status: 'idle' | 'syncing' | 'completed' | 'error';
+  progress?: { current: number; total: number; phase: string };
+  stats?: { events: number; contacts: number; insights: number };
+  lastSyncAt?: string;
+}
+
 export default function SettingsPage() {
   const [googleConnected, setGoogleConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({ status: 'idle' });
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   // Check Google connection status on load
   useEffect(() => {
     checkGoogleStatus();
+    checkSyncStatus();
   }, []);
 
   const checkGoogleStatus = async () => {
@@ -38,34 +48,69 @@ export default function SettingsPage() {
     }
   };
 
+  const checkSyncStatus = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sync/status`);
+      const data = await response.json();
+      setSyncStatus(data);
+    } catch (error) {
+      console.error('Failed to check sync status:', error);
+    }
+  };
+
   const handleConnectGoogle = async () => {
     setIsConnecting(true);
     setConnectionError(null);
 
     try {
+      console.log('Fetching OAuth URL from backend...');
       const response = await api.connectSource('google');
-      // Open the auth URL in a new window
-      window.open(response.authUrl, '_blank', 'width=600,height=700');
+      console.log('Got OAuth URL:', response.authUrl);
+
+      // Open the auth URL in a popup window
+      const popup = window.open(
+        response.authUrl,
+        'google-oauth',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        setConnectionError('Pop-up was blocked. Please allow pop-ups for this site and try again.');
+        setIsConnecting(false);
+        return;
+      }
 
       // Poll for connection status
       const checkConnection = setInterval(async () => {
-        const statusRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/status/google`);
-        const status = await statusRes.json();
-        if (status.connected) {
-          setGoogleConnected(true);
-          setIsConnecting(false);
-          clearInterval(checkConnection);
+        try {
+          const statusRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/status/google`);
+          const status = await statusRes.json();
+          console.log('Connection status:', status);
+          if (status.connected) {
+            setGoogleConnected(true);
+            setIsConnecting(false);
+            clearInterval(checkConnection);
+            // Close popup if still open
+            if (popup && !popup.closed) {
+              popup.close();
+            }
+          }
+        } catch (err) {
+          console.error('Error checking status:', err);
         }
       }, 2000);
 
       // Stop polling after 2 minutes
       setTimeout(() => {
         clearInterval(checkConnection);
-        setIsConnecting(false);
+        if (isConnecting) {
+          setIsConnecting(false);
+          setConnectionError('Connection timed out. Please try again.');
+        }
       }, 120000);
     } catch (error) {
       console.error('Failed to connect Google:', error);
-      setConnectionError('Failed to initiate Google connection');
+      setConnectionError(`Failed to initiate Google connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsConnecting(false);
     }
   };
@@ -83,11 +128,47 @@ export default function SettingsPage() {
 
   const handleSyncNow = async () => {
     setIsSyncing(true);
+    setSyncMessage(null);
+
     try {
-      // This would trigger a sync - for demo, just simulate
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    } finally {
+      // Trigger the sync
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sync/trigger`, {
+        method: 'POST',
+      });
+
+      // Poll for sync status
+      const pollSync = setInterval(async () => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sync/status`);
+          const status = await response.json();
+          setSyncStatus(status);
+
+          if (status.status === 'completed') {
+            clearInterval(pollSync);
+            setIsSyncing(false);
+            setSyncMessage(`Sync complete! Found ${status.stats?.events || 0} events, ${status.stats?.contacts || 0} contacts, and ${status.stats?.insights || 0} insights.`);
+          } else if (status.status === 'error') {
+            clearInterval(pollSync);
+            setIsSyncing(false);
+            setSyncMessage('Sync failed. Please try again.');
+          }
+        } catch (err) {
+          console.error('Error polling sync status:', err);
+        }
+      }, 1000);
+
+      // Timeout after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollSync);
+        if (isSyncing) {
+          setIsSyncing(false);
+          setSyncMessage('Sync timed out. Check the console for details.');
+        }
+      }, 300000);
+    } catch (error) {
+      console.error('Failed to trigger sync:', error);
       setIsSyncing(false);
+      setSyncMessage('Failed to start sync. Is the backend running?');
     }
   };
   return (
@@ -228,7 +309,7 @@ export default function SettingsPage() {
                         {isSyncing ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Syncing...
+                            {syncStatus.progress?.phase || 'Syncing...'}
                           </>
                         ) : (
                           'Sync Now'
@@ -259,6 +340,50 @@ export default function SettingsPage() {
               {connectionError && (
                 <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg text-sm text-red-600 dark:text-red-400">
                   {connectionError}
+                </div>
+              )}
+
+              {/* Sync Progress */}
+              {isSyncing && syncStatus.progress && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <span className="font-medium text-blue-900 dark:text-blue-200">
+                      Syncing ISOC/MSA Data...
+                    </span>
+                  </div>
+                  <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2 mb-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${syncStatus.progress.current}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    {syncStatus.progress.phase}
+                  </p>
+                </div>
+              )}
+
+              {/* Sync Result Message */}
+              {syncMessage && !isSyncing && (
+                <div className={`p-3 rounded-lg text-sm ${
+                  syncMessage.includes('complete')
+                    ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-600 dark:text-green-400'
+                    : 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 text-amber-600 dark:text-amber-400'
+                }`}>
+                  {syncMessage}
+                </div>
+              )}
+
+              {/* Last Sync Info */}
+              {syncStatus.lastSyncAt && !isSyncing && (
+                <div className="text-sm text-slate-500 dark:text-slate-400">
+                  Last synced: {new Date(syncStatus.lastSyncAt).toLocaleString()}
+                  {syncStatus.stats && (
+                    <span className="ml-2">
+                      ({syncStatus.stats.events} events, {syncStatus.stats.contacts} contacts)
+                    </span>
+                  )}
                 </div>
               )}
 

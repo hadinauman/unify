@@ -1,9 +1,9 @@
+// Load environment variables FIRST before any other imports
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -13,6 +13,7 @@ import contactsRoutes from './routes/contacts.routes';
 import organizationRoutes from './routes/organization.routes';
 import datasourcesRoutes from './routes/datasources.routes';
 import briefingsRoutes from './routes/briefings.routes';
+import syncRoutes from './routes/sync.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -55,6 +56,7 @@ app.use('/api/contacts', contactsRoutes);
 app.use('/api/organization', organizationRoutes);
 app.use('/api/datasources', datasourcesRoutes);
 app.use('/api/briefings', briefingsRoutes);
+app.use('/api/sync', syncRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -92,7 +94,9 @@ app.listen(PORT, () => {
   console.log('  ├─ GET  /api/contacts        List contacts');
   console.log('  ├─ GET  /api/organization    Get org details');
   console.log('  ├─ GET  /api/datasources     Data source status');
-  console.log('  └─ POST /api/briefings/generate   Generate briefing');
+  console.log('  ├─ POST /api/briefings/generate   Generate briefing');
+  console.log('  ├─ POST /api/sync/trigger    Trigger ISOC/MSA sync');
+  console.log('  └─ GET  /api/sync/status     Get sync status');
   console.log('');
   console.log('═══════════════════════════════════════════════');
   console.log('');
