@@ -6,48 +6,53 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare } from 'lucide-react';
+import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare, Loader2, Users, Tag } from 'lucide-react';
+import { api } from '@/lib/api';
 
-const mockResults = [
-  {
-    id: '1',
-    type: 'email',
-    title: 'Venue Booking Confirmation',
-    excerpt: 'Confirmed booking of Union Hall for Charity Week 2023. Total: £1,500...',
-    source: { type: 'email', platform: 'Gmail', date: '2023-03-15' },
-    relevanceScore: 95,
-    relatedEntities: { people: ['Ahmed Khan'], events: ['Charity Week 2023'], tags: ['venue'] },
-  },
-  {
-    id: '2',
-    type: 'document',
-    title: 'Charity Week 2023 Event Plan',
-    excerpt: 'Comprehensive planning document for CW23 including timeline, budget...',
-    source: { type: 'document', platform: 'Google Drive', date: '2023-03-10' },
-    relevanceScore: 92,
-    relatedEntities: { people: ['Ahmed Khan'], events: ['Charity Week 2023'], tags: ['planning'] },
-  },
-  {
-    id: '3',
-    type: 'slack',
-    title: '#charity-week',
-    excerpt: 'Budget locked. Venue: £1,500. @Sarah can you finalise catering?',
-    source: { type: 'message', platform: 'Slack', date: '2023-03-15' },
-    relevanceScore: 88,
-    relatedEntities: { people: ['Ahmed Khan', 'Sarah'], events: ['Charity Week 2023'], tags: [] },
-  },
-];
+interface SearchResult {
+  id: string;
+  type: string;
+  title: string;
+  excerpt: string;
+  source: { type: string; platform: string; date: string };
+  relevanceScore: number;
+  relatedEntities: { people?: string[]; events?: string[]; vendors?: string[]; tags?: string[] };
+}
+
+interface AISummary {
+  summary: string;
+  keyInsights: string[];
+  relatedQueries: string[];
+  confidence: string;
+  sources: string[];
+}
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState(mockResults);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedSource, setSelectedSource] = useState('all');
-  const [showAiSummary, setShowAiSummary] = useState(true);
+  const [aiSummary, setAiSummary] = useState<AISummary | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call API for semantic search
-    console.log('Searching for:', query);
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    setHasSearched(true);
+
+    try {
+      const response = await api.searchKnowledge(query);
+      setResults(response.results || []);
+      setAiSummary(response.aiSummary || null);
+    } catch (error) {
+      console.error('Search failed:', error);
+      setResults([]);
+      setAiSummary(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -108,8 +113,20 @@ export default function SearchPage() {
         </form>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <Card className="border-slate-200 dark:border-slate-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-center gap-3 py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-cyan-600" />
+              <p className="text-slate-600 dark:text-slate-400">Searching and generating AI summary...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* AI Summary */}
-      {showAiSummary && query && (
+      {!isLoading && aiSummary && (
         <Card className="border-cyan-200 dark:border-cyan-900 bg-cyan-50/50 dark:bg-cyan-950/20">
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-start gap-3">
@@ -119,35 +136,43 @@ export default function SearchPage() {
               <div className="flex-1 space-y-3">
                 <h3 className="font-semibold text-lg">AI Summary</h3>
                 <p className="text-slate-700 dark:text-slate-300">
-                  Based on 5 documents, venues are typically booked 2-3 months in advance
-                  through the Student Union. The process involves submitting a booking form,
-                  getting approval from your society advisor, and confirming with a deposit.
+                  {aiSummary.summary}
                 </p>
 
-                <div>
-                  <h4 className="font-medium mb-2">Key Insights:</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400">
-                    <li>Union Hall costs £1,500 for full-day events</li>
-                    <li>Early booking (3+ months) often gets 10% discount</li>
-                    <li>Always book catering separately - venues don't include food</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-2 text-sm">Related queries:</h4>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
-                      How much do venues cost?
-                    </Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
-                      Who handles venue bookings?
-                    </Badge>
+                {aiSummary.keyInsights && aiSummary.keyInsights.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Key Insights:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                      {aiSummary.keyInsights.map((insight, i) => (
+                        <li key={i}>{insight}</li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
+                )}
+
+                {aiSummary.relatedQueries && aiSummary.relatedQueries.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-sm">Related queries:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {aiSummary.relatedQueries.map((relatedQuery, i) => (
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                          onClick={() => {
+                            setQuery(relatedQuery);
+                          }}
+                        >
+                          {relatedQuery}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-2 border-t border-cyan-200 dark:border-cyan-800">
                   <p className="text-xs text-slate-500">
-                    Sources: 5 documents • Confidence: High
+                    Sources: {aiSummary.sources?.length || 0} documents • Confidence: {aiSummary.confidence || 'Medium'}
                   </p>
                 </div>
               </div>
@@ -157,67 +182,128 @@ export default function SearchPage() {
       )}
 
       {/* Search Results */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            {results.length} Results
-          </h2>
-          <p className="text-sm text-slate-500">
-            Sorted by relevance
-          </p>
-        </div>
+      {!isLoading && hasSearched && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">
+              {results.length} Results
+            </h2>
+            {results.length > 0 && (
+              <p className="text-sm text-slate-500">
+                Sorted by relevance
+              </p>
+            )}
+          </div>
 
-        {results.map((result) => {
-          const TypeIcon = getTypeIcon(result.type);
-          const typeColor = getTypeColor(result.type);
-
-          return (
-            <Card key={result.id} className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className={`h-10 w-10 rounded-lg ${typeColor} flex items-center justify-center flex-shrink-0`}>
-                      <TypeIcon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{result.title}</h3>
-                        <Badge variant="outline" className="text-xs">
-                          {result.source.platform}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {result.excerpt}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(result.source.date).toLocaleDateString('en-GB')}
-                        <span>•</span>
-                        <span className="font-mono">{result.relevanceScore}% match</span>
-                      </div>
-                      <div className="flex gap-2">
-                        {result.relatedEntities.people.map((person) => (
-                          <Badge key={person} variant="secondary" className="text-xs">
-                            {person}
-                          </Badge>
-                        ))}
-                        {result.relatedEntities.events.map((event) => (
-                          <Badge key={event} variant="secondary" className="text-xs">
-                            {event}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    View
-                  </Button>
-                </div>
+          {results.length === 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-slate-500 py-8">
+                  No results found for &quot;{query}&quot;. Try a different search term.
+                </p>
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+          )}
+
+          {results.map((result) => {
+            const TypeIcon = getTypeIcon(result.type);
+            const typeColor = getTypeColor(result.type);
+
+            return (
+              <Card key={result.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="pt-6 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className={`h-10 w-10 rounded-lg ${typeColor} flex items-center justify-center flex-shrink-0`}>
+                        <TypeIcon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{result.title}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {result.source.platform}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          {result.excerpt}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <Calendar className="h-3 w-3" />
+                          {result.source.date ? new Date(result.source.date).toLocaleDateString('en-GB') : 'No date'}
+                          <span>•</span>
+                          <span className="font-mono">{result.relevanceScore}% match</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {result.relatedEntities?.people?.map((person) => (
+                            <Badge key={person} variant="secondary" className="text-xs">
+                              <Users className="h-3 w-3 mr-1" />
+                              {person}
+                            </Badge>
+                          ))}
+                          {result.relatedEntities?.events?.map((event) => (
+                            <Badge key={event} variant="secondary" className="text-xs">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {event}
+                            </Badge>
+                          ))}
+                          {result.relatedEntities?.vendors?.map((vendor) => (
+                            <Badge key={vendor} variant="secondary" className="text-xs">
+                              {vendor}
+                            </Badge>
+                          ))}
+                          {result.relatedEntities?.tags?.map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              <Tag className="h-3 w-3 mr-1" />
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Initial State - Search Suggestions */}
+      {!hasSearched && !isLoading && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8 space-y-4">
+              <Search className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600" />
+              <div>
+                <h3 className="font-semibold text-lg">Search your organization&apos;s knowledge</h3>
+                <p className="text-slate-500 mt-1">Ask questions about events, contacts, budgets, and more</p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 pt-4">
+                {[
+                  'How did we organize Freshers Week?',
+                  'Who is our caterer?',
+                  'Charity Week budget',
+                  'Ramadan planning',
+                ].map((suggestion) => (
+                  <Badge
+                    key={suggestion}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                    onClick={() => {
+                      setQuery(suggestion);
+                    }}
+                  >
+                    {suggestion}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
