@@ -14,6 +14,7 @@ export default function SignUpPage() {
         path="/signup"
         signInUrl="/signin"
         afterSignUpUrl="/onboarding"
+        requiredFields={['firstName', 'lastName']}
       />
     </div>
   );

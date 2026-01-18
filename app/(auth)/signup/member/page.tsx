@@ -24,6 +24,7 @@ export default function SignUpMemberPage() {
           path="/signup/member"
           signInUrl="/signin"
           afterSignUpUrl="/onboarding?type=member"
+          requiredFields={['firstName', 'lastName']}
         />
 
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
