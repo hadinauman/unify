@@ -1,6 +1,18 @@
 // Load environment variables FIRST before any other imports
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+
+// Try to load from backend .env first
+dotenv.config(); // Backend .env
+
+// Try to load from root .env.local (for GEMINI_API_KEY)
+try {
+  // __dirname is available in CommonJS
+  const rootEnvPath = path.resolve(process.cwd(), '../.env.local');
+  dotenv.config({ path: rootEnvPath, override: false }); // Don't override existing vars
+} catch (e) {
+  // .env.local might not exist, that's okay
+}
 
 import express from 'express';
 import cors from 'cors';
@@ -16,7 +28,7 @@ import briefingsRoutes from './routes/briefings.routes';
 import syncRoutes from './routes/sync.routes';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // CORS configuration
 app.use(

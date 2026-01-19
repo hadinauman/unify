@@ -34,6 +34,7 @@ export default function SearchPage() {
   const [aiSummary, setAiSummary] = useState<AISummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +42,17 @@ export default function SearchPage() {
 
     setIsLoading(true);
     setHasSearched(true);
+    setError(null);
 
     try {
       const response = await api.searchKnowledge(query);
       setResults(response.results || []);
       setAiSummary(response.aiSummary || null);
+      setError(null);
     } catch (error) {
       console.error('Search failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to search. Please try again.';
+      setError(errorMessage);
       setResults([]);
       setAiSummary(null);
     } finally {
@@ -120,6 +125,28 @@ export default function SearchPage() {
             <div className="flex items-center justify-center gap-3 py-8">
               <Loader2 className="h-6 w-6 animate-spin text-cyan-600" />
               <p className="text-slate-600 dark:text-slate-400">Searching and generating AI summary...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error State */}
+      {!isLoading && error && (
+        <Card className="border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <div className="h-8 w-8 rounded-lg bg-red-500 flex items-center justify-center flex-shrink-0">
+                <Search className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg text-red-900 dark:text-red-100 mb-2">Search Error</h3>
+                <p className="text-red-700 dark:text-red-300">{error}</p>
+                {error.includes('Backend server is not running') && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                    Make sure your backend server is running on port 3001.
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

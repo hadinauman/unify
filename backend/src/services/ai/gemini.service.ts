@@ -13,6 +13,10 @@ function getGenAI(): GoogleGenerativeAI {
   return genAI;
 }
 
+export function hasGeminiKey(): boolean {
+  return !!process.env.GEMINI_API_KEY;
+}
+
 interface SearchableDocument {
   id: string;
   title: string;

@@ -494,7 +494,7 @@ Payment:
   },
   {
     id: 'contact-005',
-    name: 'TSAS - Trinity Somali Association Society',
+    name: 'TSAS - Trinity South Asian Society',
     type: 'partner',
     category: 'student-society',
     email: 'tsas@tcd.ie',

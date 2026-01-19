@@ -11,7 +11,9 @@ import type {
 } from '@/types';
 
 // Base configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Always use relative URLs to go through Next.js API routes
+// The Next.js API routes will use NEXT_PUBLIC_API_URL from .env.local to proxy to backend
+const API_BASE_URL = '';
 
 // Helper function for authenticated requests
 async function fetchWithAuth(
@@ -22,7 +24,8 @@ async function fetchWithAuth(
   // For now, we'll use a placeholder
   const token = ''; // await getAuthToken();
 
-  return fetch(`${API_BASE_URL}${endpoint}`, {
+  const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
+  return fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -77,12 +80,39 @@ export const api = {
     query: string,
     filters?: SearchFilters
   ): Promise<SearchResults> {
-    const res = await fetchWithAuth('/api/search', {
-      method: 'POST',
-      body: JSON.stringify({ query, filters }),
-    });
-    if (!res.ok) throw new Error('Failed to search');
-    return res.json();
+    try {
+      const res = await fetchWithAuth('/api/search', {
+        method: 'POST',
+        body: JSON.stringify({ query, filters }),
+      });
+      
+      if (!res.ok) {
+        let errorMessage = `Search failed (HTTP ${res.status})`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorData.details || errorMessage;
+          console.error('[API] Search error response:', errorData);
+        } catch (e) {
+          // If response is not JSON, try to get text
+          try {
+            const errorText = await res.text();
+            errorMessage = errorText || res.statusText || errorMessage;
+          } catch {
+            errorMessage = res.statusText || `HTTP ${res.status}: Failed to search`;
+          }
+        }
+        console.error('[API] Search failed:', errorMessage, 'Status:', res.status);
+        throw new Error(errorMessage);
+      }
+      
+      return res.json();
+    } catch (error) {
+      // Re-throw with more context if it's not already an Error
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`Search failed: ${String(error)}`);
+    }
   },
 
   // Briefings

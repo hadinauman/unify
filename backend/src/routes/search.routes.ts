@@ -1,124 +1,170 @@
 import express from 'express';
 import { demoEvents, demoDocuments, demoContacts } from '../services/demoData';
-import { generateSearchSummary } from '../services/ai/gemini.service';
+import { generateSearchSummary, hasGeminiKey } from '../services/ai/gemini.service';
 import { SearchResult, SearchResponse } from '../types';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-  const { query, filters } = req.body;
-
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
-  }
-
+  let query = '';
+  
   try {
+    query = req.body?.query || '';
+    
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ 
+        error: 'Query is required',
+        query: '',
+        results: [],
+        total: 0,
+        aiSummary: null,
+      });
+    }
+
     console.log(`🔍 Search query: "${query}"`);
 
     // Simple keyword search across demo data
     const searchTerm = query.toLowerCase();
+    const allResults: SearchResult[] = [];
 
     // Search documents
-    const matchingDocs = demoDocuments.filter(
-      (doc) =>
-        doc.title.toLowerCase().includes(searchTerm) ||
-        doc.summary.toLowerCase().includes(searchTerm) ||
-        doc.content.toLowerCase().includes(searchTerm) ||
-        doc.tags.some((tag) => tag.toLowerCase().includes(searchTerm))
-    );
+    try {
+      if (Array.isArray(demoDocuments)) {
+        const matchingDocs = demoDocuments.filter((doc) => {
+          if (!doc) return false;
+          return (
+            (doc.title && doc.title.toLowerCase().includes(searchTerm)) ||
+            (doc.summary && doc.summary.toLowerCase().includes(searchTerm)) ||
+            (doc.content && doc.content.toLowerCase().includes(searchTerm)) ||
+            (Array.isArray(doc.tags) && doc.tags.some((tag) => tag && tag.toLowerCase().includes(searchTerm)))
+          );
+        });
+
+        matchingDocs.forEach((doc) => {
+          if (doc && doc.id && doc.title) {
+            allResults.push({
+              id: doc.id,
+              type: 'document' as const,
+              title: doc.title || '',
+              excerpt: doc.summary || '',
+              source: {
+                type: doc.type || 'document',
+                platform: doc.source || 'unknown',
+                date: doc.date || '',
+              },
+              relevanceScore: 90,
+              relatedEntities: {
+                events: Array.isArray(doc.relatedEvents) ? doc.relatedEvents : [],
+                tags: Array.isArray(doc.tags) ? doc.tags : [],
+              },
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error searching documents:', err);
+    }
 
     // Search events
-    const matchingEvents = demoEvents.filter(
-      (event) =>
-        event.title.toLowerCase().includes(searchTerm) ||
-        event.description.toLowerCase().includes(searchTerm) ||
-        event.tags.some((tag) => tag.toLowerCase().includes(searchTerm)) ||
-        event.organizers.some((org) => org.toLowerCase().includes(searchTerm)) ||
-        event.vendors.some((vendor) => vendor.toLowerCase().includes(searchTerm))
-    );
+    try {
+      if (Array.isArray(demoEvents)) {
+        const matchingEvents = demoEvents.filter((event) => {
+          if (!event) return false;
+          return (
+            (event.title && event.title.toLowerCase().includes(searchTerm)) ||
+            (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+            (Array.isArray(event.tags) && event.tags.some((tag) => tag && tag.toLowerCase().includes(searchTerm))) ||
+            (Array.isArray(event.organizers) && event.organizers.some((org) => org && org.toLowerCase().includes(searchTerm))) ||
+            (Array.isArray(event.vendors) && event.vendors.some((vendor) => vendor && vendor.toLowerCase().includes(searchTerm)))
+          );
+        });
+
+        matchingEvents.forEach((event) => {
+          if (event && event.id && event.title) {
+            allResults.push({
+              id: event.id,
+              type: 'event' as const,
+              title: event.title || '',
+              excerpt: event.description || '',
+              source: {
+                type: 'event',
+                platform: 'calendar',
+                date: event.date || '',
+              },
+              relevanceScore: 85,
+              relatedEntities: {
+                people: Array.isArray(event.organizers) ? event.organizers : [],
+                vendors: Array.isArray(event.vendors) ? event.vendors : [],
+                tags: Array.isArray(event.tags) ? event.tags : [],
+              },
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error searching events:', err);
+    }
 
     // Search contacts
-    const matchingContacts = demoContacts.filter(
-      (contact) =>
-        contact.name.toLowerCase().includes(searchTerm) ||
-        contact.description.toLowerCase().includes(searchTerm) ||
-        contact.notes.toLowerCase().includes(searchTerm) ||
-        contact.tags.some((tag) => tag.toLowerCase().includes(searchTerm))
-    );
+    try {
+      if (Array.isArray(demoContacts)) {
+        const matchingContacts = demoContacts.filter((contact) => {
+          if (!contact) return false;
+          return (
+            (contact.name && contact.name.toLowerCase().includes(searchTerm)) ||
+            (contact.description && contact.description.toLowerCase().includes(searchTerm)) ||
+            (contact.notes && contact.notes.toLowerCase().includes(searchTerm)) ||
+            (Array.isArray(contact.tags) && contact.tags.some((tag) => tag && tag.toLowerCase().includes(searchTerm)))
+          );
+        });
 
-    // Combine into search results
-    const allResults: SearchResult[] = [
-      ...matchingDocs.map((doc) => ({
-        id: doc.id,
-        type: 'document' as const,
-        title: doc.title,
-        excerpt: doc.summary,
-        source: {
-          type: doc.type,
-          platform: doc.source,
-          date: doc.date,
-        },
-        relevanceScore: 90,
-        relatedEntities: {
-          events: doc.relatedEvents,
-          tags: doc.tags,
-        },
-      })),
-      ...matchingEvents.map((event) => ({
-        id: event.id,
-        type: 'event' as const,
-        title: event.title,
-        excerpt: event.description,
-        source: {
-          type: 'event',
-          platform: 'calendar',
-          date: event.date,
-        },
-        relevanceScore: 85,
-        relatedEntities: {
-          people: event.organizers,
-          vendors: event.vendors,
-          tags: event.tags,
-        },
-      })),
-      ...matchingContacts.map((contact) => ({
-        id: contact.id,
-        type: 'contact' as const,
-        title: contact.name,
-        excerpt: contact.description,
-        source: {
-          type: contact.type,
-          platform: 'contacts',
-          date: contact.lastContactedAt || '',
-        },
-        relevanceScore: 80,
-        relatedEntities: {
-          events: contact.eventsUsed,
-          tags: contact.tags,
-        },
-      })),
-    ];
+        matchingContacts.forEach((contact) => {
+          if (contact && contact.id && contact.name) {
+            allResults.push({
+              id: contact.id,
+              type: 'contact' as const,
+              title: contact.name || '',
+              excerpt: contact.description || '',
+              source: {
+                type: contact.type || 'contact',
+                platform: 'contacts',
+                date: contact.lastContactedAt || '',
+              },
+              relevanceScore: 80,
+              relatedEntities: {
+                events: Array.isArray(contact.eventsUsed) ? contact.eventsUsed : [],
+                tags: Array.isArray(contact.tags) ? contact.tags : [],
+              },
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error searching contacts:', err);
+    }
 
     // Sort by relevance score
     allResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // Generate AI summary using Gemini
+    // Generate AI summary using Gemini - always optional, never fail the request
     let aiSummary = null;
     if (allResults.length > 0) {
-      console.log(`🤖 Generating AI summary with Gemini...`);
       try {
-        aiSummary = await generateSearchSummary(
-          query,
-          allResults.map((r) => ({
-            id: r.id,
-            title: r.title,
-            summary: r.excerpt,
-            content: r.excerpt,
-          }))
-        );
-        console.log(`✅ AI summary generated (confidence: ${aiSummary.confidence})`);
+        if (hasGeminiKey()) {
+          console.log(`🤖 Generating AI summary...`);
+          aiSummary = await generateSearchSummary(
+            query,
+            allResults.slice(0, 10).map((r) => ({
+              id: r.id,
+              title: r.title,
+              summary: r.excerpt,
+              content: r.excerpt,
+            }))
+          );
+          console.log(`✅ AI summary generated`);
+        }
       } catch (err) {
-        console.log(`⚠️ AI summary generation failed, returning results without summary`);
+        console.log(`⚠️ AI summary skipped:`, err instanceof Error ? err.message : 'Unknown error');
       }
     }
 
@@ -129,12 +175,19 @@ router.post('/', async (req, res) => {
       total: allResults.length,
     };
 
-    res.json(response);
+    console.log(`✅ Search completed: ${allResults.length} results`);
+    return res.json(response);
   } catch (error) {
-    console.error('Search error:', error);
-    res.status(500).json({
+    console.error('❌ Search error:', error);
+    
+    // Always return a valid response
+    return res.status(500).json({
       error: 'Search failed',
       details: error instanceof Error ? error.message : 'Unknown error',
+      query: query || '',
+      results: [],
+      total: 0,
+      aiSummary: null,
     });
   }
 });
