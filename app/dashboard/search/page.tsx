@@ -6,9 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare, Loader2, Users, Tag } from 'lucide-react';
+import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare, Loader2, Users, Tag, Send } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { SearchResults } from '@/types';
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -19,6 +26,9 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +37,8 @@ export default function SearchPage() {
     setIsLoading(true);
     setHasSearched(true);
     setError(null);
+    setChatMessages([]);
+    setChatInput('');
 
     try {
       const response = await api.searchKnowledge(query);
@@ -44,6 +56,66 @@ export default function SearchPage() {
       setContextualAnswer(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || results.length === 0) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: chatInput,
+      timestamp: new Date(),
+    };
+
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: chatInput,
+          searchResults: results.map((r) => ({
+            id: r.id,
+            title: r.title,
+            excerpt: r.excerpt,
+            type: r.type,
+          })),
+          previousMessages: chatMessages,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.answer,
+        timestamp: new Date(),
+      };
+
+      setChatMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Chat failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get response';
+      const errorMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${errorMessage}`,
+        timestamp: new Date(),
+      };
+      setChatMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -310,6 +382,72 @@ export default function SearchPage() {
             );
           })}
         </div>
+
+        {/* Chat Interface for Follow-up Questions */}
+        {results.length > 0 && (
+          <Card className="border-indigo-200 dark:border-indigo-900 bg-indigo-50/30 dark:bg-indigo-950/20 mt-8">
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <MessageSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="font-semibold">Ask follow-up questions</h3>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
+                {chatMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-lg ${
+                        msg.role === 'user'
+                          ? 'bg-indigo-600 text-white rounded-br-none'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-bl-none'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                      <p className="text-xs mt-1 opacity-70">
+                        {msg.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {isChatLoading && (
+                  <div className="flex gap-3 justify-start">
+                    <div className="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-lg">
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleChatSubmit} className="flex gap-2">
+                <Input
+                  placeholder="Ask a question about these results..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  disabled={isChatLoading}
+                  className="text-sm"
+                />
+                <Button
+                  type="submit"
+                  disabled={!chatInput.trim() || isChatLoading}
+                  size="sm"
+                  className="px-3"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       )}
 
       {/* Initial State - Search Suggestions */}

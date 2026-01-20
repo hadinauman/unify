@@ -21,6 +21,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import eventsRoutes from './routes/events.routes';
 import searchRoutes from './routes/search.routes';
+import chatRoutes from './routes/chat.routes';
 import contactsRoutes from './routes/contacts.routes';
 import organizationRoutes from './routes/organization.routes';
 import datasourcesRoutes from './routes/datasources.routes';
@@ -64,6 +65,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/organization', organizationRoutes);
 app.use('/api/datasources', datasourcesRoutes);
