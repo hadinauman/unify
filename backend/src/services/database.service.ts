@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { Event, Contact, Document } from '../types';
+import { Event, Contact, Document, Organisation, OrganisationType } from '../types';
+import { organisationPresets } from '../../organisationPresets';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_KEY || '';
@@ -325,6 +326,196 @@ export class DatabaseService {
       return data as Event;
     } catch (error) {
       console.error('Database error updating event:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a user account
+   */
+  static async createUser(
+    email: string,
+    name: string,
+    googleId?: string
+  ): Promise<{ id: string; email: string } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .insert([
+          {
+            email,
+            name,
+            google_id: googleId,
+          },
+        ])
+        .select('id, email')
+        .single();
+
+      if (error) {
+        console.error('Error creating user:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error creating user:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get or create a user by email
+   */
+  static async getOrCreateUser(
+    email: string,
+    name: string,
+    googleId?: string
+  ): Promise<{ id: string; email: string } | null> {
+    try {
+      // Try to get existing user
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('email', email)
+        .single();
+
+      if (existing) {
+        return existing;
+      }
+
+      // Create new user if doesn't exist
+      return this.createUser(email, name, googleId);
+    } catch (error) {
+      console.error('Database error getting/creating user:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a new organisation
+   */
+  static async createOrganisation(
+    userId: string,
+    name: string,
+    type: OrganisationType
+  ): Promise<Organisation | null> {
+    try {
+      const preset = organisationPresets[type];
+      if (!preset) {
+        console.error('Invalid organisation type:', type);
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from('organisations')
+        .insert([
+          {
+            name,
+            type,
+            created_by_user_id: userId,
+            metadata: {
+              foundedYear: new Date().getFullYear(),
+            },
+            terminology: preset.terminology,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating organisation:', error);
+        return null;
+      }
+
+      // Add the creator as an admin member
+      await supabase.from('user_organisations').insert([
+        {
+          user_id: userId,
+          organisation_id: data.id,
+          role: 'admin',
+        },
+      ]);
+
+      return data as Organisation;
+    } catch (error) {
+      console.error('Database error creating organisation:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get an organisation by ID
+   */
+  static async getOrganisation(organisationId: string): Promise<Organisation | null> {
+    try {
+      const { data, error } = await supabase
+        .from('organisations')
+        .select('*')
+        .eq('id', organisationId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching organisation:', error);
+        return null;
+      }
+
+      return data as Organisation;
+    } catch (error) {
+      console.error('Database error fetching organisation:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get all organisations for a user
+   */
+  static async getUserOrganisations(userId: string): Promise<Organisation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('user_organisations')
+        .select('organisations(*)')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error fetching user organisations:', error);
+        return [];
+      }
+
+      return data.map((row: any) => row.organisations as Organisation);
+    } catch (error) {
+      console.error('Database error fetching user organisations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update an organisation
+   */
+  static async updateOrganisation(
+    organisationId: string,
+    updates: Partial<Organisation>
+  ): Promise<Organisation | null> {
+    try {
+      const { data, error } = await supabase
+        .from('organisations')
+        .update({
+          name: updates.name,
+          metadata: updates.metadata,
+          terminology: updates.terminology,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', organisationId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating organisation:', error);
+        return null;
+      }
+
+      return data as Organisation;
+    } catch (error) {
+      console.error('Database error updating organisation:', error);
       return null;
     }
   }

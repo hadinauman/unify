@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,12 +15,17 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { organisationPresets } from '@/lib/organisationPresets';
+import type { OrganisationType } from '@/backend/src/types';
 
 function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useUser();
   const signupType = searchParams.get('type'); // 'organisation' or 'member'
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     orgName: '',
     orgType: '',
@@ -38,10 +44,56 @@ function OnboardingContent() {
     }
   }, [signupType]);
 
-  const handleSubmit = () => {
-    // TODO: Save organisation data to backend
-    // For now, redirect to connect page
-    router.push('/connect');
+  const handleSubmit = async () => {
+    if (!user?.id) {
+      setError('User not authenticated');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Determine final organisation type
+      const finalOrgType = formData.orgSubtype || (formData.orgType as OrganisationType);
+
+      // Create organisation in database
+      const response = await fetch('/api/organisations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          name: formData.orgName,
+          type: finalOrgType,
+          metadata: {
+            foundedYear: parseInt(formData.foundedYear),
+            membersCount: parseInt(formData.membersCount) || 0,
+            academicYear: formData.committeeYear,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create organisation');
+      }
+
+      const organisation = await response.json();
+
+      // Save organisation ID to localStorage for dashboard context
+      localStorage.setItem('currentOrganisationId', organisation.id);
+
+      // Redirect to connect or dashboard
+      router.push('/connect');
+    } catch (err) {
+      console.error('Error creating organisation:', err);
+      setError(
+        err instanceof Error ? err.message : 'Failed to create organisation'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,6 +126,12 @@ function OnboardingContent() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg p-4">
+              <p className="text-sm text-red-900 dark:text-red-200">{error}</p>
+            </div>
+          )}
+
           {step === 1 && signupType === 'organisation' && (
             <div className="space-y-4">
               <div>
@@ -94,39 +152,26 @@ function OnboardingContent() {
                 <Select
                   value={formData.orgType}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, orgType: value })
+                    setFormData({ ...formData, orgType: value, orgSubtype: '' })
                   }
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="student-org">Student Organisation</SelectItem>
-                    <SelectItem value="nonprofit">Nonprofit</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
+                    {Object.entries(organisationPresets).map(([key, preset]) => (
+                      <SelectItem key={key} value={key}>
+                        {preset.icon} {preset.displayName}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {formData.orgType && organisationPresets[formData.orgType as OrganisationType] && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {organisationPresets[formData.orgType as OrganisationType].description}
+                  </p>
+                )}
               </div>
-
-              {formData.orgType === 'student-org' && (
-                <div>
-                  <Label htmlFor="orgSubtype">Subtype</Label>
-                  <Select
-                    value={formData.orgSubtype}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, orgSubtype: value })
-                    }
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select subtype" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="isoc-msa">ISOC/MSA</SelectItem>
-                      <SelectItem value="other">Other Society</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               <div>
                 <Label htmlFor="membersCount">Estimated Members</Label>
@@ -284,11 +329,13 @@ function OnboardingContent() {
                   onClick={() => router.push('/dashboard')}
                   variant="outline"
                   className="flex-1"
+                  disabled={loading}
                 >
                   Skip for now
                 </Button>
-                <Button onClick={handleSubmit} className="flex-1">
-                  Connect Data Sources <ArrowRight className="ml-2 h-4 w-4" />
+                <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
+                  {loading ? 'Creating...' : 'Connect Data Sources'}{' '}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>

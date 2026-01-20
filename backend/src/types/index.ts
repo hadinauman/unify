@@ -1,52 +1,168 @@
 // Core Types for Unify Backend
 
-export interface Organization {
+export type OrganisationType =
+  | 'student-isoc-msa'
+  | 'student-society'
+  | 'consulting-firm'
+  | 'marketing-agency'
+  | 'creative-agency'
+  | 'nonprofit'
+  | 'restaurant'
+  | 'retail-store'
+  | 'franchise'
+  | 'sales-team'
+  | 'other';
+
+export interface OrganisationTerminology {
+  teamLabel: string;          // "Committee" | "Team" | "Staff" | "Employees"
+  memberLabel: string;        // "Member" | "Employee" | "Staff Member"
+  leaderLabel: string;        // "President" | "CEO" | "Manager" | "Director"
+  eventLabel: string;         // "Event" | "Project" | "Campaign" | "Service"
+  periodLabel: string;        // "Academic Year" | "Fiscal Year" | "Quarter" | "Year"
+}
+
+export interface Organisation {
   id: string;
   name: string;
-  type: string;
-  founded: number;
-  currentMembers: number;
-  academicYear: string;
+  type: OrganisationType;
+
+  // Flexible metadata based on org type
+  metadata: {
+    // For student orgs:
+    academicYear?: string;
+    membersCount?: number;
+
+    // For businesses:
+    employeeCount?: number;
+    fiscalYear?: string;
+    industry?: string;
+
+    // Universal:
+    foundedYear: number;
+    location?: string;
+  };
+
+  // Customisation
+  terminology: OrganisationTerminology;
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Event {
   id: string;
+  organisationId: string;
+
+  // Universal fields
   title: string;
-  date: string;
+  description?: string;
+  startDate: string;
   endDate?: string;
-  type: 'educational' | 'social' | 'religious' | 'fundraiser';
-  semester: 'semester-1' | 'semester-2';
-  attendance: number;
-  budget: {
-    planned: number;
-    actual: number;
+  type: string;  // Dynamic based on org type
+
+  // Metrics (different orgs track different things)
+  metrics: {
+    // Student org metrics:
+    attendance?: number;
+    fundraising?: number;
+
+    // Business metrics:
+    revenue?: number;
+    clientSatisfaction?: number;
+    teamHours?: number;
+
+    // Universal:
+    budget?: {
+      planned: number;
+      actual: number;
+      breakdown?: { category: string; amount: number }[];
+    };
+    rating?: number;
   };
+
+  // Relationships (flexible)
+  people: {
+    organisers?: string[];
+    participants?: string[];
+    clients?: string[];
+    vendors?: string[];
+  };
+
+  // Context
+  outcomes: {
+    successFactors?: string[];
+    challenges?: string[];
+    lessonsLearned?: string[];
+    nextSteps?: string[];
+  };
+
   tags: string[];
-  organizers: string[];
-  vendors: string[];
-  description: string;
-  whatWorked?: string[];
-  challenges?: string[];
-  speaker?: string;
+  documents?: string[];  // Document IDs
+
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type ContactType =
+  | 'vendor'
+  | 'client'
+  | 'partner'
+  | 'speaker'
+  | 'consultant'
+  | 'alumnus'
+  | 'sponsor'
+  | 'supplier'
+  | 'contractor'
+  | 'other';
 
 export interface Contact {
   id: string;
+  organisationId: string;
+
   name: string;
-  fullName?: string;
-  type: 'vendor' | 'speaker' | 'partner';
-  category?: string;
-  email?: string;
-  phone?: string;
-  website?: string;
-  address?: string;
-  description: string;
-  notes: string;
-  rating: number;
-  eventsUsed?: string[];
+  type: ContactType;
+
+  contactInfo: {
+    email?: string;
+    phone?: string;
+    website?: string;
+    address?: string;
+  };
+
+  // Flexible metadata per type
+  metadata: {
+    // For clients:
+    accountValue?: number;
+    contractEndDate?: string;
+
+    // For vendors:
+    services?: string[];
+    pricing?: string;
+    leadTime?: string;
+
+    // For speakers/consultants:
+    expertise?: string[];
+    hourlyRate?: number;
+
+    // Universal:
+    company?: string;
+    position?: string;
+    notes?: string;
+  };
+
+  // Relationship tracking
+  interactions: {
+    eventsInvolved: string[];
+    lastContactDate?: string;
+    frequency: 'regular' | 'occasional' | 'one-time';
+    relationshipStrength: 'strong' | 'moderate' | 'weak';
+  };
+
+  rating?: number;
   tags: string[];
-  lastContactedAt?: string;
-  relationshipStrength?: 'strong' | 'moderate' | 'weak';
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Document {
