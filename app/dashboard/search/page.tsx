@@ -381,7 +381,6 @@ export default function SearchPage() {
               </Card>
             );
           })}
-        </div>
 
         {/* Chat Interface for Follow-up Questions */}
         {results.length > 0 && (
@@ -448,6 +447,7 @@ export default function SearchPage() {
             </CardContent>
           </Card>
         )}
+        </div>
       )}
 
       {/* Initial State - Search Suggestions */}
