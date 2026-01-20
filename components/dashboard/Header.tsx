@@ -1,10 +1,16 @@
 'use client';
 
+import { useOrganisation } from '@/lib/contexts/OrganisationContext';
 import { Button } from '@/components/ui/button';
 import { UserButton } from '@clerk/nextjs';
 import { Bell, Settings } from 'lucide-react';
 
 export function DashboardHeader() {
+  const { currentOrganisation, loadingOrganisations } = useOrganisation();
+
+  const orgName = currentOrganisation?.name || 'Loading...';
+  const academicYear = currentOrganisation?.metadata?.academicYear || new Date().getFullYear().toString();
+
   return (
     <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -14,8 +20,8 @@ export function DashboardHeader() {
             <span className="text-white font-semibold text-sm">U</span>
           </div>
           <div>
-            <h1 className="font-semibold text-lg">TCD MSA</h1>
-            <p className="text-xs text-slate-500">2025-2026</p>
+            <h1 className="font-semibold text-lg">{orgName}</h1>
+            <p className="text-xs text-slate-500">{academicYear}</p>
           </div>
         </div>
 

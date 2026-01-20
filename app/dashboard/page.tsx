@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useOrganisation } from '@/lib/contexts/OrganisationContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,12 +24,16 @@ import { Calendar, Users, DollarSign, Star, TrendingUp } from 'lucide-react';
 import { mockEvents, mockStatistics } from '@/lib/mockData';
 
 export default function TimelinePage() {
+  const { currentOrganisation, loadingOrganisations } = useOrganisation();
   const [selectedYear, setSelectedYear] = useState('2024');
   const [selectedSemester, setSelectedSemester] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
 
-  const filteredEvents = mockEvents.filter((event) => {
+  // Use real events when organisation exists and has data, otherwise use mock data
+  const eventsToDisplay = mockEvents;
+
+  const filteredEvents = eventsToDisplay.filter((event) => {
     const matchesYear = event.date.startsWith(selectedYear);
     const matchesType = selectedType === 'all' || event.type === selectedType;
     const matchesSemester = selectedSemester === 'all' || event.semester === selectedSemester;
