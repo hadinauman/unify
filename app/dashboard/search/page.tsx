@@ -8,30 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare, Loader2, Users, Tag } from 'lucide-react';
 import { api } from '@/lib/api';
-
-interface SearchResult {
-  id: string;
-  type: string;
-  title: string;
-  excerpt: string;
-  source: { type: string; platform: string; date: string };
-  relevanceScore: number;
-  relatedEntities: { people?: string[]; events?: string[]; vendors?: string[]; tags?: string[] };
-}
-
-interface AISummary {
-  summary: string;
-  keyInsights: string[];
-  relatedQueries: string[];
-  confidence: string;
-  sources: string[];
-}
+import type { SearchResults } from '@/types';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<SearchResults['results']>([]);
   const [selectedSource, setSelectedSource] = useState('all');
-  const [aiSummary, setAiSummary] = useState<AISummary | null>(null);
+  const [aiSummary, setAiSummary] = useState<SearchResults['aiSummary'] | null>(null);
+  const [contextualAnswer, setContextualAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +30,10 @@ export default function SearchPage() {
 
     try {
       const response = await api.searchKnowledge(query);
+      console.log('Frontend received search response:', response);
       setResults(response.results || []);
       setAiSummary(response.aiSummary || null);
+      setContextualAnswer(response.contextualAnswer || null);
       setError(null);
     } catch (error) {
       console.error('Search failed:', error);
@@ -55,6 +41,7 @@ export default function SearchPage() {
       setError(errorMessage);
       setResults([]);
       setAiSummary(null);
+      setContextualAnswer(null);
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +55,10 @@ export default function SearchPage() {
         return FileText;
       case 'slack':
         return MessageSquare;
+      case 'event':
+        return Calendar;
+      case 'contact':
+        return Users;
       default:
         return FileText;
     }
@@ -81,6 +72,10 @@ export default function SearchPage() {
         return 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-400';
       case 'slack':
         return 'text-purple-600 bg-purple-50 dark:bg-purple-950 dark:text-purple-400';
+      case 'event':
+        return 'text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-400';
+      case 'contact':
+        return 'text-pink-600 bg-pink-50 dark:bg-pink-950 dark:text-pink-400';
       default:
         return 'text-slate-600 bg-slate-50 dark:bg-slate-950 dark:text-slate-400';
     }
@@ -152,16 +147,35 @@ export default function SearchPage() {
         </Card>
       )}
 
+      {/* Contextual Answer */}
+      {!isLoading && contextualAnswer && (
+        <Card className="border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/20">
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center flex-shrink-0">
+                <MessageSquare className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 space-y-3">
+                <h3 className="font-semibold text-lg">AI Answer</h3>
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                  {contextualAnswer}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* AI Summary */}
       {!isLoading && aiSummary && (
         <Card className="border-cyan-200 dark:border-cyan-900 bg-cyan-50/50 dark:bg-cyan-950/20">
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 space-y-3">
-                <h3 className="font-semibold text-lg">AI Summary</h3>
+                <h3 className="font-semibold text-lg">Summary & Insights</h3>
                 <p className="text-slate-700 dark:text-slate-300">
                   {aiSummary.summary}
                 </p>

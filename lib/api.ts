@@ -85,7 +85,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ query, filters }),
       });
-      
+
       if (!res.ok) {
         let errorMessage = `Search failed (HTTP ${res.status})`;
         try {
@@ -104,8 +104,10 @@ export const api = {
         console.error('[API] Search failed:', errorMessage, 'Status:', res.status);
         throw new Error(errorMessage);
       }
-      
-      return res.json();
+
+      const data = await res.json();
+      console.log('[API] Search response:', data);
+      return data;
     } catch (error) {
       // Re-throw with more context if it's not already an Error
       if (error instanceof Error) {

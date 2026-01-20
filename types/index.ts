@@ -111,9 +111,10 @@ export interface SearchResult {
   };
   relevanceScore: number; // 0-100
   relatedEntities: {
-    people: string[];
-    events: string[];
-    tags: string[];
+    people?: string[];
+    events?: string[];
+    vendors?: string[];
+    tags?: string[];
   };
   url?: string;
 }
@@ -127,6 +128,7 @@ export interface SearchResults {
     sources: string[];
     confidence: 'high' | 'medium' | 'low';
   };
+  contextualAnswer?: string;
   results: SearchResult[];
   total: number;
 }

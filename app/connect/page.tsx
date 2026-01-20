@@ -162,7 +162,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -190,7 +190,7 @@ import {
 } from 'lucide-react';
 import type { DataSource } from '@/types';
 
-export default function ConnectPage() {
+function ConnectPageContent() {
   const searchParams = useSearchParams();
   const [dataSources, setDataSources] = useState<DataSource[]>([
     { id: '1', platform: 'google', connected: false },
@@ -451,5 +451,13 @@ export default function ConnectPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function ConnectPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConnectPageContent />
+    </Suspense>
   );
 }
