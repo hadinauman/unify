@@ -1,6 +1,6 @@
 import express from 'express';
 import { demoEvents, demoDocuments, demoContacts } from '../services/demoData';
-import { generateSearchSummary, hasClaudeKey, generateContextualAnswer } from '../services/ai/claude.service';
+import { generateSearchSummary, hasGeminiKey, generateContextualAnswer } from '../services/ai/gemini.service';
 import { SearchResult, SearchResponse } from '../types';
 
 const router = express.Router();
@@ -146,14 +146,14 @@ router.post('/', async (req, res) => {
     // Sort by relevance score
     allResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // Generate AI contextual answer using Claude
+    // Generate AI contextual answer using Gemini
     let aiSummary = null;
     let contextualAnswer = null;
 
     if (allResults.length > 0) {
       try {
-        if (hasClaudeKey()) {
-          console.log(`🤖 Generating contextual answer with Claude...`);
+        if (hasGeminiKey()) {
+          console.log(`🤖 Generating contextual answer with Gemini...`);
 
           // Generate conversational answer
           contextualAnswer = await generateContextualAnswer(

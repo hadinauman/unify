@@ -30,7 +30,7 @@ export async function generateSearchSummary(
 ): Promise<AISearchSummary> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const docsText = documents
       .slice(0, 10)
@@ -111,7 +111,7 @@ export async function generateContextualAnswer(
 ): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const docsText = documents
       .slice(0, 15)
@@ -151,7 +151,7 @@ export async function generateBriefing(
 ): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const docsText = documents
       .slice(0, 15)
