@@ -1,6 +1,6 @@
 import express from 'express';
 import { demoEvents, demoDocuments, demoContacts } from '../services/demoData';
-import { generateSearchSummary, hasGeminiKey } from '../services/ai/gemini.service';
+import { generateSearchSummary, hasClaudeKey, generateContextualAnswer } from '../services/ai/claude.service';
 import { SearchResult, SearchResponse } from '../types';
 
 const router = express.Router();
@@ -146,12 +146,28 @@ router.post('/', async (req, res) => {
     // Sort by relevance score
     allResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // Generate AI summary using Gemini - always optional, never fail the request
+    // Generate AI contextual answer using Claude
     let aiSummary = null;
+    let contextualAnswer = null;
+
     if (allResults.length > 0) {
       try {
-        if (hasGeminiKey()) {
-          console.log(`🤖 Generating AI summary...`);
+        if (hasClaudeKey()) {
+          console.log(`🤖 Generating contextual answer with Claude...`);
+
+          // Generate conversational answer
+          contextualAnswer = await generateContextualAnswer(
+            query,
+            allResults.slice(0, 15).map((r) => ({
+              id: r.id,
+              title: r.title,
+              summary: r.excerpt,
+              content: r.excerpt,
+            }))
+          );
+          console.log(`✅ Contextual answer generated`);
+
+          // Also generate structured summary for insights
           aiSummary = await generateSearchSummary(
             query,
             allResults.slice(0, 10).map((r) => ({
@@ -161,16 +177,16 @@ router.post('/', async (req, res) => {
               content: r.excerpt,
             }))
           );
-          console.log(`✅ AI summary generated`);
         }
       } catch (err) {
-        console.log(`⚠️ AI summary skipped:`, err instanceof Error ? err.message : 'Unknown error');
+        console.log(`⚠️ AI generation skipped:`, err instanceof Error ? err.message : 'Unknown error');
       }
     }
 
     const response: SearchResponse = {
       query,
       aiSummary,
+      contextualAnswer: contextualAnswer || undefined,
       results: allResults,
       total: allResults.length,
     };
