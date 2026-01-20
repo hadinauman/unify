@@ -30,7 +30,7 @@ export async function generateSearchSummary(
 ): Promise<AISearchSummary> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: 'gemini-pro' });
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const docsText = documents
       .slice(0, 10)
@@ -105,13 +105,53 @@ Respond with only valid JSON, no markdown formatting.`;
   }
 }
 
+export async function generateContextualAnswer(
+  query: string,
+  documents: SearchableDocument[]
+): Promise<string> {
+  try {
+    const ai = getGenAI();
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const docsText = documents
+      .slice(0, 15)
+      .map((d, i) => `[${i + 1}] ${d.title}\n${d.summary || d.content || 'No details'}`)
+      .join('\n\n');
+
+    const prompt = `You are an AI assistant for a student Islamic society. Answer the user's question conversationally based ONLY on the provided organizational data.
+
+USER QUESTION: "${query}"
+
+AVAILABLE INFORMATION:
+${docsText}
+
+INSTRUCTIONS:
+- Give a natural, conversational answer as if you're helping a committee member
+- Only use information from the provided documents
+- If information is incomplete, say so honestly
+- Include specific details like dates, people, vendors, or numbers when relevant
+- For "how to" questions, provide practical steps based on past experiences
+- Be helpful and supportive in tone
+- If the documents don't contain relevant information, suggest what they should look for
+
+ANSWER:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini contextual answer error:', error);
+    return `I encountered an error generating a response. Please check the search results below for information about "${query}".`;
+  }
+}
+
 export async function generateBriefing(
   role: string,
   documents: SearchableDocument[]
 ): Promise<string> {
   try {
     const ai = getGenAI();
-    const model = ai.getGenerativeModel({ model: 'gemini-pro' });
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const docsText = documents
       .slice(0, 15)
