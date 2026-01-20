@@ -42,3 +42,4 @@ next-env.d.ts
 NUL
 # clerk configuration (can include secrets)
 /.clerk/
+backend/test_gemini.js
