@@ -53,6 +53,7 @@ router.post('/', async (req, res) => {
                 date: doc.date || '',
               },
               relevanceScore: 90,
+              url: doc.url,
               relatedEntities: {
                 events: Array.isArray(doc.relatedEvents) ? doc.relatedEvents : [],
                 tags: Array.isArray(doc.tags) ? doc.tags : [],

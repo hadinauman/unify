@@ -451,6 +451,7 @@ export const demoDocuments: Document[] = [
     type: 'google-doc',
     source: 'drive',
     date: '2024-08-15',
+    url: 'https://docs.google.com/document/d/1FreshersWeekPlanningDoc/edit',
     summary:
       'Comprehensive plan for Freshers Week including budget, timeline, vendor contacts, and responsibilities.',
     content: `Freshers Week 2024 Planning Document
@@ -478,6 +479,7 @@ Responsibilities:
     type: 'email',
     source: 'gmail',
     date: '2024-09-01',
+    url: 'https://mail.google.com/mail/u/0/#inbox/FMfcgzGqwkhGqLvZqN',
     summary:
       'Confirmation email for Student Union Hall booking for Freshers event on September 12.',
     content: `From: venues@tcd.ie
@@ -504,6 +506,7 @@ TCD Venues Team`,
     type: 'spreadsheet',
     source: 'drive',
     date: '2024-11-01',
+    url: 'https://docs.google.com/spreadsheets/d/1CharityWeek2024Budget/edit',
     summary:
       'Detailed budget tracking for Charity Week 2024 showing planned vs actual expenses and fundraising totals.',
     content: `Charity Week 2024 Budget
@@ -528,6 +531,7 @@ Fundraising:
     type: 'email',
     source: 'gmail',
     date: '2024-08-20',
+    url: 'https://mail.google.com/mail/u/0/#inbox/FMfcgzGqwkhGqLvZqP',
     summary: 'Quote from Bite Box for Freshers Week catering - platters for 80 people.',
     content: `From: catering@biteboxdublin.ie
 To: tcdmsa@tcd.ie
@@ -560,6 +564,7 @@ Bite Box Catering Team`,
     type: 'google-doc',
     source: 'drive',
     date: '2025-02-15',
+    url: 'https://docs.google.com/document/d/1RamadanIftarSchedule2025/edit',
     summary: 'Complete schedule and logistics plan for daily iftars during Ramadan 2025.',
     content: `Ramadan Iftar Schedule 2025
 
@@ -589,6 +594,7 @@ Catering: Bite Box (bulk order discount)`,
     type: 'google-doc',
     source: 'drive',
     date: '2024-05-15',
+    url: 'https://docs.google.com/document/d/1CommitteeHandoverNotes/edit',
     summary:
       'Handover document from previous committee with key contacts, lessons learned, and recommendations.',
     content: `TCD MSA Committee Handover Notes 2024

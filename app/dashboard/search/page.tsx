@@ -7,8 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Sparkles, Calendar, Mail, FileText, MessageSquare, Loader2, Users, Tag, Send } from 'lucide-react';
+import { DocumentViewer } from '@/components/document-viewer';
 import { api } from '@/lib/api';
-import type { SearchResults } from '@/types';
+import type { SearchResults, SearchResult } from '@/types';
 
 interface ChatMessage {
   id: string;
@@ -29,6 +30,8 @@ export default function SearchPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<SearchResult | null>(null);
+  const [isDocumentViewerOpen, setIsDocumentViewerOpen] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +154,11 @@ export default function SearchPage() {
       default:
         return 'text-slate-600 bg-slate-50 dark:bg-slate-950 dark:text-slate-400';
     }
+  };
+
+  const handleOpenDocument = (document: SearchResult) => {
+    setSelectedDocument(document);
+    setIsDocumentViewerOpen(true);
   };
 
   return (
@@ -373,7 +381,11 @@ export default function SearchPage() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenDocument(result)}
+                    >
                       View
                     </Button>
                   </div>
@@ -483,6 +495,13 @@ export default function SearchPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Document Viewer Modal */}
+      <DocumentViewer
+        document={selectedDocument}
+        isOpen={isDocumentViewerOpen}
+        onClose={() => setIsDocumentViewerOpen(false)}
+      />
     </div>
   );
 }

@@ -12,7 +12,8 @@
       "Bash(git push:*)",
       "Bash(git stash:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)"
     ]
   }
 }

@@ -57,6 +57,7 @@ export interface Document {
   date: string;
   summary: string;
   content: string;
+  url?: string;
   relatedEvents: string[];
   tags: string[];
 }
@@ -72,6 +73,7 @@ export interface SearchResult {
     date: string;
   };
   relevanceScore: number;
+  url?: string;
   relatedEntities: {
     events?: string[];
     people?: string[];
@@ -91,6 +93,7 @@ export interface AISearchSummary {
 export interface SearchResponse {
   query: string;
   aiSummary: AISearchSummary | null;
+  contextualAnswer?: string; // Conversational AI answer
   results: SearchResult[];
   total: number;
 }
