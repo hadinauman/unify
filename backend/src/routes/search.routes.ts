@@ -1,5 +1,6 @@
 import express from 'express';
 import { demoEvents, demoDocuments, demoContacts } from '../services/demoData';
+import { DatabaseService } from '../services/database.service';
 import { generateSearchSummary, hasGeminiKey, generateContextualAnswer } from '../services/ai/gemini.service';
 import { SearchResult, SearchResponse } from '../types';
 
@@ -7,12 +8,13 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   let query = '';
-  
+
   try {
     query = req.body?.query || '';
-    
+    const organisationId = req.body?.organisationId || '';
+
     if (!query || typeof query !== 'string') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Query is required',
         query: '',
         results: [],
@@ -21,16 +23,38 @@ router.post('/', async (req, res) => {
       });
     }
 
-    console.log(`🔍 Search query: "${query}"`);
+    console.log(`🔍 Search query: "${query}" for org: ${organisationId || 'demo'}`);
 
-    // Simple keyword search across demo data
+    // Determine what data to search
+    let eventsToSearch = demoEvents;
+    let documentsToSearch = demoDocuments;
+    let contactsToSearch = demoContacts;
+
+    // If organisation ID is provided and it's NOT the demo TCD MSA org, fetch real data from database
+    if (organisationId && organisationId !== 'org-demo-tcd-msa' && organisationId !== 'demo') {
+      try {
+        eventsToSearch = await DatabaseService.getEvents(organisationId);
+        documentsToSearch = await DatabaseService.getDocuments(organisationId);
+        contactsToSearch = await DatabaseService.getContacts(organisationId);
+        console.log(`📊 Using database data for org ${organisationId}`);
+      } catch (err) {
+        console.warn(`Could not fetch org data, falling back to empty results`, err);
+        eventsToSearch = [];
+        documentsToSearch = [];
+        contactsToSearch = [];
+      }
+    } else if (organisationId) {
+      console.log(`📚 Using demo data for org ${organisationId}`);
+    }
+
+    // Simple keyword search
     const searchTerm = query.toLowerCase();
     const allResults: SearchResult[] = [];
 
     // Search documents
     try {
-      if (Array.isArray(demoDocuments)) {
-        const matchingDocs = demoDocuments.filter((doc) => {
+      if (Array.isArray(documentsToSearch)) {
+        const matchingDocs = documentsToSearch.filter((doc) => {
           if (!doc) return false;
           return (
             (doc.title && doc.title.toLowerCase().includes(searchTerm)) ||
@@ -68,8 +92,8 @@ router.post('/', async (req, res) => {
 
     // Search events
     try {
-      if (Array.isArray(demoEvents)) {
-        const matchingEvents = demoEvents.filter((event) => {
+      if (Array.isArray(eventsToSearch)) {
+        const matchingEvents = eventsToSearch.filter((event) => {
           if (!event) return false;
           return (
             (event.title && event.title.toLowerCase().includes(searchTerm)) ||
@@ -108,8 +132,8 @@ router.post('/', async (req, res) => {
 
     // Search contacts
     try {
-      if (Array.isArray(demoContacts)) {
-        const matchingContacts = demoContacts.filter((contact) => {
+      if (Array.isArray(contactsToSearch)) {
+        const matchingContacts = contactsToSearch.filter((contact) => {
           if (!contact) return false;
           return (
             (contact.name && contact.name.toLowerCase().includes(searchTerm)) ||

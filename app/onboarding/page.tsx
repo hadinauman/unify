@@ -58,6 +58,7 @@ function OnboardingContent() {
       const finalOrgType = formData.orgSubtype || (formData.orgType as OrganisationType);
 
       // Create organisation in database
+      // Note: The backend will add type-specific metadata automatically
       const response = await fetch('/api/organisations', {
         method: 'POST',
         headers: {
@@ -67,11 +68,9 @@ function OnboardingContent() {
           userId: user.id,
           name: formData.orgName,
           type: finalOrgType,
-          metadata: {
-            foundedYear: parseInt(formData.foundedYear),
-            membersCount: parseInt(formData.membersCount) || 0,
-            academicYear: formData.committeeYear,
-          },
+          foundedYear: parseInt(formData.foundedYear),
+          periodYear: formData.committeeYear, // Can be academic year, fiscal year, etc
+          initialCount: parseInt(formData.membersCount) || 0,
         }),
       });
 

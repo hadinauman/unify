@@ -406,6 +406,32 @@ export class DatabaseService {
         return null;
       }
 
+      // Build metadata based on organisation type
+      const metadata: Record<string, any> = {
+        foundedYear: new Date().getFullYear(),
+      };
+
+      // Add type-specific fields
+      if (type === 'student-isoc-msa' || type === 'student-society') {
+        metadata.academicYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+        metadata.membersCount = 0;
+      } else if (type === 'consulting-firm' || type === 'creative-agency' || type === 'marketing-agency') {
+        metadata.employeeCount = 0;
+        metadata.fiscalYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+      } else if (type === 'restaurant' || type === 'retail-store') {
+        metadata.staffCount = 0;
+        metadata.year = new Date().getFullYear();
+      } else if (type === 'franchise' || type === 'sales-team') {
+        metadata.teamSize = 0;
+        metadata.fiscalYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+      } else if (type === 'nonprofit') {
+        metadata.volunteerCount = 0;
+        metadata.fiscalYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+      } else {
+        // Default for 'other' type
+        metadata.year = new Date().getFullYear();
+      }
+
       const { data, error } = await supabase
         .from('organisations')
         .insert([
@@ -413,9 +439,7 @@ export class DatabaseService {
             name,
             type,
             created_by_user_id: userId,
-            metadata: {
-              foundedYear: new Date().getFullYear(),
-            },
+            metadata,
             terminology: preset.terminology,
           },
         ])
