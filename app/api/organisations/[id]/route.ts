@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/organization/${params.id}`);
+    const response = await fetch(`${BACKEND_URL}/api/organisation/${params.id}`);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function PATCH(
   try {
     const body = await request.json();
 
-    const response = await fetch(`${BACKEND_URL}/api/organization/${params.id}`, {
+    const response = await fetch(`${BACKEND_URL}/api/organisation/${params.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

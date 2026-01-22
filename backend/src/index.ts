@@ -23,10 +23,11 @@ import eventsRoutes from './routes/events.routes';
 import searchRoutes from './routes/search.routes';
 import chatRoutes from './routes/chat.routes';
 import contactsRoutes from './routes/contacts.routes';
-import organizationRoutes from './routes/organization.routes';
+import organisationRoutes from './routes/organisation.routes';
 import datasourcesRoutes from './routes/datasources.routes';
 import briefingsRoutes from './routes/briefings.routes';
 import syncRoutes from './routes/sync.routes';
+import slackRoutes from './routes/slack.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -67,10 +68,11 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/contacts', contactsRoutes);
-app.use('/api/organization', organizationRoutes);
+app.use('/api/organisation', organisationRoutes);
 app.use('/api/datasources', datasourcesRoutes);
 app.use('/api/briefings', briefingsRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/slack', slackRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -106,7 +108,7 @@ app.listen(PORT, () => {
   console.log('  ├─ GET  /api/events          List events');
   console.log('  ├─ POST /api/search          AI-powered search');
   console.log('  ├─ GET  /api/contacts        List contacts');
-  console.log('  ├─ GET  /api/organization    Get org details');
+  console.log('  ├─ GET  /api/organisation    Get org details');
   console.log('  ├─ GET  /api/datasources     Data source status');
   console.log('  ├─ POST /api/briefings/generate   Generate briefing');
   console.log('  ├─ POST /api/sync/trigger    Trigger ISOC/MSA sync');

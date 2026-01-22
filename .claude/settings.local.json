@@ -13,7 +13,14 @@
       "Bash(git stash:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(pkill:*)",
+      "Bash(wmic process:*)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"[Console]::In.ReadToEnd\\(\\) | ConvertFrom-Json | ConvertTo-Json -Depth 10\")",
+      "Bash(powershell -Command \"[Console]::In.ReadToEnd\\(\\)\")",
+      "Bash(powershell -Command:*)",
+      "Bash(ls:*)"
     ]
   }
 }

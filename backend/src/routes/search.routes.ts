@@ -1,10 +1,70 @@
 import express from 'express';
-import { demoEvents, demoDocuments, demoContacts } from '../services/demoData';
 import { DatabaseService } from '../services/database.service';
 import { generateSearchSummary, hasGeminiKey, generateContextualAnswer } from '../services/ai/gemini.service';
-import { SearchResult, SearchResponse } from '../types';
+import { SearchResult, SearchResponse, Event, Contact, Document } from '../types';
 
 const router = express.Router();
+
+// Mock data for TCD MSA testing
+const mockDemoEvents: Event[] = [
+  {
+    id: 'event-001',
+    organisationId: 'org-demo-tcd-msa',
+    title: 'Freshers Week 2024',
+    description: 'Welcome event for new students',
+    startDate: '2024-09-12',
+    type: 'social',
+    metrics: { attendance: 75, budget: { planned: 400, actual: 380 } },
+    people: { organisers: ['Abdul Wadood'], vendors: ['Bite Box'] },
+    outcomes: { successFactors: ['Great turnout', 'Excellent catering'] },
+    tags: ['freshers', 'social'],
+    updatedAt: '2024-09-12T00:00:00Z',
+  },
+  {
+    id: 'event-002',
+    organisationId: 'org-demo-tcd-msa',
+    title: 'Charity Week 2024',
+    description: 'Annual fundraising week',
+    startDate: '2024-11-18',
+    endDate: '2024-11-24',
+    type: 'fundraiser',
+    metrics: { attendance: 120, fundraising: 8500, budget: { planned: 600, actual: 575 } },
+    people: { organisers: ['Ameera Saeed'], vendors: ['Bite Box'] },
+    outcomes: { successFactors: ['Exceeded target - raised €8,500'] },
+    tags: ['fundraising', 'charity'],
+    updatedAt: '2024-11-24T00:00:00Z',
+  },
+];
+
+const mockDemoContacts: Contact[] = [
+  {
+    id: 'contact-001',
+    organisationId: 'org-demo-tcd-msa',
+    name: 'Bite Box',
+    type: 'vendor',
+    contactInfo: { email: 'info@biteboxdublin.ie', phone: '01 616 5877' },
+    metadata: { services: ['Halal catering'], pricing: '10% student discount', notes: 'Very reliable' },
+    interactions: { eventsInvolved: ['event-001', 'event-002'], frequency: 'regular', relationshipStrength: 'strong' },
+    rating: 5,
+    tags: ['catering', 'halal'],
+    updatedAt: '2024-11-24T00:00:00Z',
+  },
+];
+
+const mockDemoDocuments: Document[] = [
+  {
+    id: 'doc-001',
+    organisationId: 'org-demo-tcd-msa',
+    title: 'Freshers Week Planning',
+    type: 'google-doc',
+    source: 'drive',
+    date: '2024-08-15',
+    summary: 'Comprehensive plan for Freshers Week',
+    content: 'Freshers Week budget: €400. Catering: Bite Box.',
+    relatedEvents: ['event-001'],
+    tags: ['planning', 'freshers'],
+  },
+];
 
 router.post('/', async (req, res) => {
   let query = '';
@@ -26,9 +86,9 @@ router.post('/', async (req, res) => {
     console.log(`🔍 Search query: "${query}" for org: ${organisationId || 'demo'}`);
 
     // Determine what data to search
-    let eventsToSearch = demoEvents;
-    let documentsToSearch = demoDocuments;
-    let contactsToSearch = demoContacts;
+    let eventsToSearch: Event[] = [];
+    let documentsToSearch: Document[] = [];
+    let contactsToSearch: Contact[] = [];
 
     // If organisation ID is provided and it's NOT the demo TCD MSA org, fetch real data from database
     if (organisationId && organisationId !== 'org-demo-tcd-msa' && organisationId !== 'demo') {
@@ -43,8 +103,12 @@ router.post('/', async (req, res) => {
         documentsToSearch = [];
         contactsToSearch = [];
       }
-    } else if (organisationId) {
-      console.log(`📚 Using demo data for org ${organisationId}`);
+    } else if (organisationId === 'org-demo-tcd-msa' || organisationId === 'demo') {
+      // Use mock data for TCD MSA testing
+      eventsToSearch = mockDemoEvents;
+      documentsToSearch = mockDemoDocuments;
+      contactsToSearch = mockDemoContacts;
+      console.log(`📚 Using mock data for TCD MSA`);
     }
 
     // Simple keyword search
@@ -99,8 +163,8 @@ router.post('/', async (req, res) => {
             (event.title && event.title.toLowerCase().includes(searchTerm)) ||
             (event.description && event.description.toLowerCase().includes(searchTerm)) ||
             (Array.isArray(event.tags) && event.tags.some((tag) => tag && tag.toLowerCase().includes(searchTerm))) ||
-            (Array.isArray(event.organizers) && event.organizers.some((org) => org && org.toLowerCase().includes(searchTerm))) ||
-            (Array.isArray(event.vendors) && event.vendors.some((vendor) => vendor && vendor.toLowerCase().includes(searchTerm)))
+            (event.people?.organisers && Array.isArray(event.people.organisers) && event.people.organisers.some((org: string) => org && org.toLowerCase().includes(searchTerm))) ||
+            (event.people?.vendors && Array.isArray(event.people.vendors) && event.people.vendors.some((vendor: string) => vendor && vendor.toLowerCase().includes(searchTerm)))
           );
         });
 
@@ -114,12 +178,12 @@ router.post('/', async (req, res) => {
               source: {
                 type: 'event',
                 platform: 'calendar',
-                date: event.date || '',
+                date: event.startDate || '',
               },
               relevanceScore: 85,
               relatedEntities: {
-                people: Array.isArray(event.organizers) ? event.organizers : [],
-                vendors: Array.isArray(event.vendors) ? event.vendors : [],
+                people: event.people?.organisers || [],
+                vendors: event.people?.vendors || [],
                 tags: Array.isArray(event.tags) ? event.tags : [],
               },
             });
@@ -137,8 +201,7 @@ router.post('/', async (req, res) => {
           if (!contact) return false;
           return (
             (contact.name && contact.name.toLowerCase().includes(searchTerm)) ||
-            (contact.description && contact.description.toLowerCase().includes(searchTerm)) ||
-            (contact.notes && contact.notes.toLowerCase().includes(searchTerm)) ||
+            (contact.metadata?.notes && contact.metadata.notes.toLowerCase().includes(searchTerm)) ||
             (Array.isArray(contact.tags) && contact.tags.some((tag) => tag && tag.toLowerCase().includes(searchTerm)))
           );
         });
@@ -149,15 +212,15 @@ router.post('/', async (req, res) => {
               id: contact.id,
               type: 'contact' as const,
               title: contact.name || '',
-              excerpt: contact.description || '',
+              excerpt: contact.metadata?.notes || '',
               source: {
                 type: contact.type || 'contact',
                 platform: 'contacts',
-                date: contact.lastContactedAt || '',
+                date: contact.interactions?.lastContactDate || '',
               },
               relevanceScore: 80,
               relatedEntities: {
-                events: Array.isArray(contact.eventsUsed) ? contact.eventsUsed : [],
+                events: contact.interactions?.eventsInvolved || [],
                 tags: Array.isArray(contact.tags) ? contact.tags : [],
               },
             });

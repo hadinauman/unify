@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { Event, Contact, Document, Organisation, OrganisationType } from '../types';
-import { organisationPresets } from '../../organisationPresets';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_KEY || '';
@@ -8,117 +7,6 @@ const supabaseKey = process.env.SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export class DatabaseService {
-  /**
-   * Save an event to the database
-   */
-  static async saveEvent(organisationId: string, event: Event): Promise<Event | null> {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .insert([
-          {
-            organisation_id: organisationId,
-            title: event.title,
-            description: event.description,
-            date: event.date,
-            end_date: event.endDate,
-            type: event.type,
-            attendance: event.attendance,
-            budget_planned: event.budget?.planned || 0,
-            budget_actual: event.budget?.actual || 0,
-            success_factors: event.whatWorked,
-            challenges: event.challenges,
-            tags: event.tags,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error saving event:', error);
-        return null;
-      }
-
-      return data as Event;
-    } catch (error) {
-      console.error('Database error saving event:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Save a contact to the database
-   */
-  static async saveContact(organisationId: string, contact: Contact): Promise<Contact | null> {
-    try {
-      const { data, error } = await supabase
-        .from('contacts')
-        .insert([
-          {
-            organisation_id: organisationId,
-            name: contact.name,
-            type: contact.type,
-            email: contact.email,
-            phone: contact.phone,
-            website: contact.website,
-            description: contact.description,
-            notes: contact.notes,
-            rating: contact.rating,
-            last_contacted_at: contact.lastContactedAt,
-            relationship_strength: contact.relationshipStrength,
-            tags: contact.tags,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error saving contact:', error);
-        return null;
-      }
-
-      return data as Contact;
-    } catch (error) {
-      console.error('Database error saving contact:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Save a document to the database
-   */
-  static async saveDocument(organisationId: string, document: Document): Promise<Document | null> {
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .insert([
-          {
-            organisation_id: organisationId,
-            title: document.title,
-            type: document.type,
-            source: document.source,
-            summary: document.summary,
-            content: document.content,
-            url: document.url,
-            date: document.date,
-            related_events: document.relatedEvents,
-            tags: document.tags,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error saving document:', error);
-        return null;
-      }
-
-      return data as Document;
-    } catch (error) {
-      console.error('Database error saving document:', error);
-      return null;
-    }
-  }
 
   /**
    * Get all events for an organization
@@ -298,37 +186,6 @@ export class DatabaseService {
     }
   }
 
-  /**
-   * Update an event
-   */
-  static async updateEvent(eventId: string, updates: Partial<Event>): Promise<Event | null> {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .update({
-          title: updates.title,
-          description: updates.description,
-          attendance: updates.attendance,
-          budget_planned: updates.budget?.planned,
-          budget_actual: updates.budget?.actual,
-          tags: updates.tags,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', eventId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating event:', error);
-        return null;
-      }
-
-      return data as Event;
-    } catch (error) {
-      console.error('Database error updating event:', error);
-      return null;
-    }
-  }
 
   /**
    * Create a user account
@@ -400,12 +257,6 @@ export class DatabaseService {
     type: OrganisationType
   ): Promise<Organisation | null> {
     try {
-      const preset = organisationPresets[type];
-      if (!preset) {
-        console.error('Invalid organisation type:', type);
-        return null;
-      }
-
       // Build metadata based on organisation type
       const metadata: Record<string, any> = {
         foundedYear: new Date().getFullYear(),
@@ -432,6 +283,87 @@ export class DatabaseService {
         metadata.year = new Date().getFullYear();
       }
 
+      // Build terminology based on organisation type
+      const terminologyMap: Record<OrganisationType, any> = {
+        'student-society': {
+          teamLabel: 'Committee',
+          memberLabel: 'Member',
+          leaderLabel: 'President',
+          eventLabel: 'Event',
+          periodLabel: 'Academic Year',
+        },
+        'student-isoc-msa': {
+          teamLabel: 'Committee',
+          memberLabel: 'Member',
+          leaderLabel: 'President',
+          eventLabel: 'Event',
+          periodLabel: 'Academic Year',
+        },
+        'consulting-firm': {
+          teamLabel: 'Team',
+          memberLabel: 'Employee',
+          leaderLabel: 'Director',
+          eventLabel: 'Project',
+          periodLabel: 'Fiscal Year',
+        },
+        'creative-agency': {
+          teamLabel: 'Team',
+          memberLabel: 'Team Member',
+          leaderLabel: 'Creative Director',
+          eventLabel: 'Campaign',
+          periodLabel: 'Fiscal Year',
+        },
+        'marketing-agency': {
+          teamLabel: 'Team',
+          memberLabel: 'Team Member',
+          leaderLabel: 'Account Manager',
+          eventLabel: 'Campaign',
+          periodLabel: 'Fiscal Year',
+        },
+        restaurant: {
+          teamLabel: 'Staff',
+          memberLabel: 'Staff Member',
+          leaderLabel: 'Manager',
+          eventLabel: 'Service',
+          periodLabel: 'Year',
+        },
+        'retail-store': {
+          teamLabel: 'Staff',
+          memberLabel: 'Staff Member',
+          leaderLabel: 'Manager',
+          eventLabel: 'Event',
+          periodLabel: 'Year',
+        },
+        franchise: {
+          teamLabel: 'Team',
+          memberLabel: 'Franchise Partner',
+          leaderLabel: 'Franchisor',
+          eventLabel: 'Initiative',
+          periodLabel: 'Fiscal Year',
+        },
+        'sales-team': {
+          teamLabel: 'Team',
+          memberLabel: 'Sales Rep',
+          leaderLabel: 'Sales Manager',
+          eventLabel: 'Deal',
+          periodLabel: 'Fiscal Year',
+        },
+        nonprofit: {
+          teamLabel: 'Team',
+          memberLabel: 'Volunteer',
+          leaderLabel: 'Executive Director',
+          eventLabel: 'Initiative',
+          periodLabel: 'Fiscal Year',
+        },
+        other: {
+          teamLabel: 'Team',
+          memberLabel: 'Member',
+          leaderLabel: 'Leader',
+          eventLabel: 'Event',
+          periodLabel: 'Year',
+        },
+      };
+
       const { data, error } = await supabase
         .from('organisations')
         .insert([
@@ -440,7 +372,7 @@ export class DatabaseService {
             type,
             created_by_user_id: userId,
             metadata,
-            terminology: preset.terminology,
+            terminology: terminologyMap[type],
           },
         ])
         .select()

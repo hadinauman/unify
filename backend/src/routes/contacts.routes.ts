@@ -27,12 +27,14 @@ router.get('/', (req, res) => {
 
   if (rating) {
     const minRating = parseInt(rating as string, 10);
-    filtered = filtered.filter((c) => c.rating >= minRating);
+    filtered = filtered.filter((c) => (c.rating || 0) >= minRating);
   }
 
   // Sort by rating (highest first), then by name
   filtered.sort((a, b) => {
-    if (b.rating !== a.rating) return b.rating - a.rating;
+    const aRating = a.rating || 0;
+    const bRating = b.rating || 0;
+    if (bRating !== aRating) return bRating - aRating;
     return a.name.localeCompare(b.name);
   });
 

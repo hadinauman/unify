@@ -184,7 +184,6 @@ import {
   FileText,
   MessageSquare,
   CheckCircle2,
-  Upload,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
@@ -245,11 +244,55 @@ function ConnectPageContent() {
     }
   };
 
-  const handleSlackConnect = () => {
-    // TODO: Call API with the Slack API key
-    console.log('Connecting to Slack with API key:', slackApiKey);
-    setIsSlackDialogOpen(false);
-    setSlackApiKey('');
+  const handleSlackConnect = async () => {
+    if (!slackApiKey) return;
+
+    setIsConnecting('slack');
+    setMessage(null);
+
+    try {
+      console.log('Connecting to Slack with API key');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/slack/connect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: slackApiKey,
+          organisationId: 'org-demo-tcd-msa', // TODO: Get actual organisation ID from context
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage({ type: 'error', text: data.error || 'Failed to connect Slack' });
+        setIsConnecting(null);
+        return;
+      }
+
+      // Mark Slack as connected
+      setDataSources(prev => prev.map(ds =>
+        ds.platform === 'slack' ? { ...ds, connected: true } : ds
+      ));
+
+      setMessage({ type: 'success', text: 'Slack connected successfully!' });
+      setIsSlackDialogOpen(false);
+      setSlackApiKey('');
+      setIsConnecting(null);
+
+      // Optionally trigger sync
+      console.log('Slack connected, syncing data...');
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/slack/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organisationId: 'org-demo-tcd-msa',
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to connect Slack:', error);
+      setMessage({ type: 'error', text: `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+      setIsConnecting(null);
+    }
   };
 
   const platformConfig: Record<string, {
@@ -373,25 +416,6 @@ function ConnectPageContent() {
               </Card>
             );
           })}
-
-          {/* WhatsApp Upload Card */}
-          <Card>
-            <CardHeader>
-              <div className="h-16 w-16 rounded-lg bg-green-50 dark:bg-green-950 flex items-center justify-center mb-4">
-                <Upload className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <CardTitle>WhatsApp</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Upload chat exports (.txt or .zip)
-              </p>
-              <Button variant="outline" className="w-full">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Chats
-              </Button>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Bottom Actions */}

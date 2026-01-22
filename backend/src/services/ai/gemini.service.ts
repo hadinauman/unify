@@ -201,3 +201,82 @@ Welcome to your role as ${role} of TCD MSA. This briefing will help you get star
 *Note: AI-generated briefing temporarily unavailable. Please refer to historical documents.*`;
   }
 }
+
+/**
+ * Extract contacts and events from Slack messages using AI
+ */
+export async function extractSlackData(slackData: {
+  channels: Array<{ name: string; topic: string; purpose: string; messageCount: number }>;
+  users: Array<{ id: string; name: string }>;
+  messagesByChannel: Record<string, string[]>;
+  organisationId: string;
+}): Promise<{
+  contacts?: Array<{ name: string; type: string; notes: string }>;
+  events?: Array<{ title: string; description: string; date: string }>;
+}> {
+  try {
+    const ai = getGenAI();
+    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+    // Prepare a summary of messages (first 5 from each channel to avoid huge prompts)
+    const messageSummary = Object.entries(slackData.messagesByChannel)
+      .map(([channel, messages]) => {
+        const sampleMessages = messages.slice(0, 5).join('\n- ');
+        return `**#${channel}** (${messages.length} total messages):\n- ${sampleMessages}`;
+      })
+      .join('\n\n');
+
+    const prompt = `You are an AI assistant analyzing Slack workspace data to extract valuable organizational information.
+
+**Workspace Overview:**
+- Channels: ${slackData.channels.map(c => `#${c.name}`).join(', ')}
+- Users: ${slackData.users.map(u => u.name).join(', ')}
+
+**Recent Messages Sample:**
+${messageSummary}
+
+**Task:** Extract important contacts and events from these Slack messages and conversations.
+
+**Return JSON with this structure:**
+{
+  "contacts": [
+    {
+      "name": "Contact Name",
+      "type": "vendor|client|partner|speaker|consultant|other",
+      "notes": "Brief context about this contact from Slack"
+    }
+  ],
+  "events": [
+    {
+      "title": "Event Title",
+      "description": "What happened",
+      "date": "2024-01-15"
+    }
+  ]
+}
+
+Focus on:
+1. **Contacts**: People or organizations mentioned as vendors, clients, speakers, or important collaborators
+2. **Events**: Meetings, projects, launches, deadlines, or activities mentioned in conversations
+
+Only return valid JSON, no additional text.`;
+
+    const response = await model.generateContent(prompt);
+    const responseText = response.response.text();
+
+    // Parse JSON from response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('No valid JSON found in Slack extraction response');
+      return { contacts: [], events: [] };
+    }
+
+    const extractedData = JSON.parse(jsonMatch[0]);
+    console.log(`✅ Extracted ${extractedData.contacts?.length || 0} contacts and ${extractedData.events?.length || 0} events`);
+
+    return extractedData;
+  } catch (error) {
+    console.error('Failed to extract Slack data:', error);
+    return { contacts: [], events: [] };
+  }
+}

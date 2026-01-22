@@ -99,7 +99,7 @@ export interface Event {
   tags: string[];
   documents?: string[];  // Document IDs
 
-  createdAt: string;
+  createdAt?: string;
   updatedAt: string;
 }
 
@@ -161,12 +161,13 @@ export interface Contact {
   rating?: number;
   tags: string[];
 
-  createdAt: string;
+  createdAt?: string;
   updatedAt: string;
 }
 
 export interface Document {
   id: string;
+  organisationId: string;
   title: string;
   type: 'google-doc' | 'email' | 'spreadsheet';
   source: 'drive' | 'gmail';
