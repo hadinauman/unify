@@ -3,9 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TrendingUp, Users, DollarSign, Calendar, Award } from 'lucide-react';
+import { useOrganisation } from '@/lib/contexts/OrganisationContext';
 import { mockStatistics } from '@/lib/mockData';
 
 export default function InsightsPage() {
+  const { currentOrganisation } = useOrganisation();
+
+  // Only show demo data for TCD MSA
+  const showDemoData = currentOrganisation?.name === 'TCD MSA';
+  const stats = showDemoData ? mockStatistics : { totalEvents: 0, avgAttendance: 0, totalFundraisingRaised: 0, avgRating: 0 };
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-6">
       <div>
@@ -15,6 +22,16 @@ export default function InsightsPage() {
         </p>
       </div>
 
+      {!showDemoData && (
+        <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="pt-6">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              No data yet. Connect your data sources and sync to see insights about your organisation.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Key Metrics */}
       <div className="grid md:grid-cols-4 gap-4">
         <Card>
@@ -23,7 +40,7 @@ export default function InsightsPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStatistics.totalEvents}</div>
+            <div className="text-2xl font-bold">{stats.totalEvents}</div>
             <p className="text-xs text-muted-foreground">+12% from last year</p>
           </CardContent>
         </Card>
@@ -34,7 +51,7 @@ export default function InsightsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStatistics.avgAttendance}</div>
+            <div className="text-2xl font-bold">{stats.avgAttendance}</div>
             <p className="text-xs text-muted-foreground">+8% from last year</p>
           </CardContent>
         </Card>
@@ -45,7 +62,7 @@ export default function InsightsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{(mockStatistics.totalFundraisingRaised / 1000).toFixed(0)}K</div>
+            <div className="text-2xl font-bold">€{(stats.totalFundraisingRaised / 1000).toFixed(0)}K</div>
             <p className="text-xs text-muted-foreground">+18% from last year</p>
           </CardContent>
         </Card>
@@ -56,7 +73,7 @@ export default function InsightsPage() {
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStatistics.avgRating}</div>
+            <div className="text-2xl font-bold">{stats.avgRating}</div>
             <p className="text-xs text-muted-foreground">+0.2 from last year</p>
           </CardContent>
         </Card>

@@ -30,8 +30,8 @@ export default function TimelinePage() {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
 
-  // Use real events when organisation exists and has data, otherwise use mock data
-  const eventsToDisplay = mockEvents;
+  // Use mock data only for TCD MSA demo organisation, otherwise show empty for new organisations
+  const eventsToDisplay = currentOrganisation?.name === 'TCD MSA' ? mockEvents : [];
 
   const filteredEvents = eventsToDisplay.filter((event) => {
     const matchesYear = event.date.startsWith(selectedYear);
@@ -99,15 +99,15 @@ export default function TimelinePage() {
         {/* Stats Cards */}
         <div className="flex gap-4">
           <div className="text-center">
-            <div className="text-2xl font-semibold">{mockStatistics.totalEvents}</div>
+            <div className="text-2xl font-semibold">{eventsToDisplay.length > 0 ? mockStatistics.totalEvents : 0}</div>
             <div className="text-xs text-slate-500">Total Events</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-semibold">{mockStatistics.avgAttendance}</div>
+            <div className="text-2xl font-semibold">{eventsToDisplay.length > 0 ? mockStatistics.avgAttendance : 0}</div>
             <div className="text-xs text-slate-500">Avg Attendance</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-semibold">€{(mockStatistics.totalFundraisingRaised / 1000).toFixed(0)}K</div>
+            <div className="text-2xl font-semibold">€{eventsToDisplay.length > 0 ? (mockStatistics.totalFundraisingRaised / 1000).toFixed(0) : 0}K</div>
             <div className="text-xs text-slate-500">Total Raised</div>
           </div>
         </div>

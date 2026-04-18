@@ -34,6 +34,19 @@ export function OrganisationProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       try {
+        // Try to restore from localStorage first (for newly created organisations)
+        const savedOrgJson = localStorage.getItem('currentOrganisation');
+        if (savedOrgJson) {
+          try {
+            const savedOrg = JSON.parse(savedOrgJson);
+            setCurrentOrganisation(savedOrg);
+            // Clear it after using so it reloads fresh from API next time
+            localStorage.removeItem('currentOrganisation');
+          } catch (e) {
+            console.warn('Failed to parse cached organisation:', e);
+          }
+        }
+
         const response = await fetch(`/api/organisations?userId=${user.id}`);
 
         if (!response.ok) {
@@ -43,7 +56,7 @@ export function OrganisationProvider({ children }: { children: ReactNode }) {
         const organisations = await response.json();
         setUserOrganisations(organisations);
 
-        // Try to restore last selected organisation from localStorage
+        // Try to restore last selected organisation from localStorage ID
         const savedOrgId = localStorage.getItem('currentOrganisationId');
         if (savedOrgId && organisations.length > 0) {
           const saved = organisations.find((org: Organisation) => org.id === savedOrgId);

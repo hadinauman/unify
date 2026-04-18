@@ -472,25 +472,6 @@ export default function SearchPage() {
                 <h3 className="font-semibold text-lg">Search your organization&apos;s knowledge</h3>
                 <p className="text-slate-500 mt-1">Ask questions about events, contacts, budgets, and more</p>
               </div>
-              <div className="flex flex-wrap justify-center gap-2 pt-4">
-                {[
-                  'How did we organize Freshers Week?',
-                  'Who is our caterer?',
-                  'Charity Week budget',
-                  'Ramadan planning',
-                ].map((suggestion) => (
-                  <Badge
-                    key={suggestion}
-                    variant="outline"
-                    className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
-                    onClick={() => {
-                      setQuery(suggestion);
-                    }}
-                  >
-                    {suggestion}
-                  </Badge>
-                ))}
-              </div>
             </div>
           </CardContent>
         </Card>

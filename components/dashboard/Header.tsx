@@ -4,6 +4,7 @@ import { useOrganisation } from '@/lib/contexts/OrganisationContext';
 import { Button } from '@/components/ui/button';
 import { UserButton } from '@clerk/nextjs';
 import { Bell, Settings } from 'lucide-react';
+import Link from 'next/link';
 
 export function DashboardHeader() {
   const { currentOrganisation, loadingOrganisations } = useOrganisation();
@@ -30,8 +31,10 @@ export function DashboardHeader() {
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <Settings className="h-5 w-5" />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/dashboard/settings">
+              <Settings className="h-5 w-5" />
+            </Link>
           </Button>
           <UserButton afterSignOutUrl="/" />
         </div>

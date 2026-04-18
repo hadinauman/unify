@@ -27,12 +27,11 @@ export default function LandingPage() {
               Unify
             </h1>
             <p className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 font-medium">
-              Institutional memory that never graduates
+              Institutional memory management for organisations
             </p>
           </div>
           <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-            When your entire committee changes annually, institutional knowledge
-            shouldn't vanish. Unify preserves what matters—automatically.
+            Centralise your scattered knowledge. Connect the tools you use. Surface answers instantly with AI. Unify eliminates knowledge fragmentation so your team can find answers, learn from the past, and make informed decisions without reinventing the wheel.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button size="lg" className="text-lg px-8" asChild>
@@ -68,7 +67,7 @@ export default function LandingPage() {
       <section className="bg-white dark:bg-slate-900 py-16 md:py-24">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-semibold text-center mb-12 text-slate-900 dark:text-slate-50">
-            The Institutional Amnesia Crisis
+            The Problem: Knowledge Fragmentation
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card>
@@ -77,7 +76,7 @@ export default function LandingPage() {
                   <HelpCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
-                  "How did we run Charity Week?"
+                  "How did we run this program?"
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400">
                   New committees rediscover solutions to solved problems
@@ -94,7 +93,7 @@ export default function LandingPage() {
                   "Who do I contact?"
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Critical vendor/partner relationships lost when people graduate
+                  Critical partner relationships lost when people leave
                 </p>
               </CardContent>
             </Card>
@@ -108,7 +107,7 @@ export default function LandingPage() {
                   "Why do we do it this way?"
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Decisions and reasoning forgotten, same debates repeated annually
+                  Decisions and reasoning forgotten, same debates repeated 
                 </p>
               </CardContent>
             </Card>
@@ -216,15 +215,15 @@ export default function LandingPage() {
       <section className="bg-gradient-to-br from-slate-900 to-cyan-950 dark:from-slate-950 dark:to-cyan-950 py-16 md:py-24">
         <div className="container mx-auto px-4 text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-semibold text-white">
-            Start preserving your institutional memory
+            Ready to unlock your organisation's collective knowledge?
           </h2>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            5 minutes to set up • Built for student organisations
+            Join organisations using Unify to eliminate knowledge loss, reduce time spent searching, and make better decisions based on institutional memory.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link href="/signup/organisation">
-                Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
+                Create Organisation <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -240,7 +239,7 @@ export default function LandingPage() {
                 Unify
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Institutional memory that never graduates
+                Institutional memory management for organisations
               </p>
             </div>
             <div>
@@ -295,7 +294,7 @@ export default function LandingPage() {
               </h4>
               <div className="flex gap-4">
                 <Link
-                  href="https://instagram.com/unify"
+                  href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
@@ -304,7 +303,7 @@ export default function LandingPage() {
                   <Instagram className="h-5 w-5" />
                 </Link>
                 <Link
-                  href="https://tiktok.com/@unify"
+                  href="https://tiktok.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"

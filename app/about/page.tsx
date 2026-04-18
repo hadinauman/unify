@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'About Unify - Institutional Memory for Student Organisations',
+  title: 'About Unify - Institutional Memory Management',
   description:
-    'Learn how Unify helps student organisations preserve institutional knowledge across annual leadership turnover.',
+    'Unify eliminates knowledge fragmentation by centralising your organisation\'s institutional memory in one searchable hub.',
 };
 
 export default function AboutPage() {
@@ -32,8 +32,7 @@ export default function AboutPage() {
             About Unify
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-            Institutional memory management for student organisations with high
-            leadership turnover.
+            Institutional memory management for organisations facing knowledge fragmentation and turnover.
           </p>
         </div>
       </section>
@@ -46,18 +45,13 @@ export default function AboutPage() {
               The Problem
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-              Student organisations like ISocs and MSAs face 100% committee
-              turnover annually. When new leadership takes over, critical
-              institutional knowledge vanishes—event planning details, vendor
-              relationships, budget strategies, and hard-won lessons learned are
-              lost.
+              Organisations lose critical knowledge daily. Important decisions, relationships, project details, and hard-won lessons get trapped in scattered emails, Slack threads, Google Docs, and departed team members' memories.
             </p>
             <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-              Every year, new committees ask the same questions: "How did we run
-              Charity Week?", "Who's our reliable caterer?", "What budget worked
-              for Ramadan iftars?". The answers exist somewhere in old emails,
-              scattered Google Docs, and graduated students' memories—but they're
-              impossible to find.
+              When someone asks "Why did we choose this approach?", "Who handled this vendor last time?", or "What worked for our last campaign?"—the answers exist somewhere, but finding them wastes hours or becomes impossible.
+            </p>
+            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+              This isn't just a handover problem. It's an everyday productivity drain that costs teams time, money, and momentum.
             </p>
           </div>
         </div>
@@ -71,11 +65,7 @@ export default function AboutPage() {
               Our Solution
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-              Unify preserves your organisation's institutional memory by
-              connecting to the tools you already use (Gmail, Google Drive, Slack)
-              and using AI to extract, organize, and present knowledge so new
-              committee members can instantly understand what happened before, what
-              worked, and how to succeed.
+              Unify acts as your organisation's institutional memory by connecting to the tools you already use (Gmail, Google Drive, Slack) and using AI to extract, organise, and surface knowledge instantly—so your team can find answers, learn from the past, and make informed decisions without reinventing the wheel.
             </p>
           </div>
 
@@ -90,8 +80,7 @@ export default function AboutPage() {
                   Timeline of Events
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Visual chronological history showing what happened, who was
-                  involved, budgets, attendance, and lessons learned.
+                  Visual chronological history showing what happened, who was involved, budgets, outcomes, and lessons learnt. Track progress and patterns over time.
                 </p>
               </CardContent>
             </Card>
@@ -105,8 +94,7 @@ export default function AboutPage() {
                   AI-Powered Search
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Ask natural questions like "How did we book venues last year?"
-                  and get instant answers with context.
+                  Ask natural questions like "How did we handle the venue issue last quarter?" or "What vendors did we use for catering?" and get instant answers with full context.
                 </p>
               </CardContent>
             </Card>
@@ -117,11 +105,10 @@ export default function AboutPage() {
                   <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                  Contact Database
+                  Contact & Vendor Database
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Vendors, speakers, partners with ratings, notes, and event
-                  history so you know who to contact.
+                  Centralised directory of vendors, partners, speakers, and stakeholders with interaction history, ratings, notes, and recommendations.
                 </p>
               </CardContent>
             </Card>
@@ -132,11 +119,10 @@ export default function AboutPage() {
                   <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                  Role-Specific Briefings
+                  Automated Briefings & Insights
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Auto-generated onboarding docs for each committee role with
-                  relevant context and advice.
+                  AI-generated summaries of projects, decisions, and outcomes. Get role-specific context or project overviews without digging through archives.
                 </p>
               </CardContent>
             </Card>
@@ -147,11 +133,10 @@ export default function AboutPage() {
                   <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                  Budget & Analytics
+                  Interactive Data Visualisation
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  See what budgets worked, attendance patterns, and fundraising
-                  trends over time.
+                  Dynamic graphs and charts revealing spending patterns, engagement trends, project timelines, and organisational relationships. Understand your data at a glance.
                 </p>
               </CardContent>
             </Card>
@@ -162,11 +147,10 @@ export default function AboutPage() {
                   <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                  Seamless Handover
+                  Analytics Dashboard
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Transfer presidency with one click while preserving all
-                  institutional knowledge.
+                  Track key metrics across projects, budgets, attendance, and outcomes. Identify what's working and spot patterns to improve future planning.
                 </p>
               </CardContent>
             </Card>
@@ -186,19 +170,25 @@ export default function AboutPage() {
                 <div className="h-6 w-6 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <div className="h-2 w-2 rounded-full bg-cyan-600 dark:bg-cyan-400" />
                 </div>
-                <span>Islamic Societies (ISocs) and Muslim Students Associations (MSAs)</span>
+                <span>Student organisations with frequent leadership changes</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="h-6 w-6 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <div className="h-2 w-2 rounded-full bg-cyan-600 dark:bg-cyan-400" />
                 </div>
-                <span>Student organisations with annual leadership changes</span>
+                <span>Nonprofits and community groups managing volunteers and committees</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="h-6 w-6 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <div className="h-2 w-2 rounded-full bg-cyan-600 dark:bg-cyan-400" />
                 </div>
-                <span>Community groups and nonprofit chapters</span>
+                <span>Small teams and startups where everyone wears multiple hats</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="h-6 w-6 rounded-full bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="h-2 w-2 rounded-full bg-cyan-600 dark:bg-cyan-400" />
+                </div>
+                <span>Any organisation where knowledge gets lost in communication silos</span>
               </li>
             </ul>
           </div>
@@ -222,8 +212,7 @@ export default function AboutPage() {
                     Connect Your Tools
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400">
-                    One-click integration with Google Workspace, Slack, or Outlook.
-                    Unify securely accesses your emails, documents, and messages.
+                    One-click integration with Google Workspace, Slack, or Outlook. Unify securely accesses your emails, documents, and messages.
                   </p>
                 </div>
               </div>
@@ -237,8 +226,7 @@ export default function AboutPage() {
                     AI Extracts Knowledge
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400">
-                    Our AI analyzes your data to extract events, decisions,
-                    contacts, budgets, and patterns automatically.
+                    Our AI analyses your data to extract events, decisions, contacts, budgets, patterns, and relationships automatically.
                   </p>
                 </div>
               </div>
@@ -249,11 +237,10 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-2">
-                    Search & Discover
+                    Search, Visualise & Discover
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400">
-                    New committee members can search anything, explore the timeline,
-                    and get role-specific briefings instantly.
+                    Team members search anything, explore interactive timelines, visualise relationships and trends, and surface insights instantly—no more digging through old threads.
                   </p>
                 </div>
               </div>
@@ -266,11 +253,10 @@ export default function AboutPage() {
       <section className="bg-gradient-to-br from-slate-900 to-cyan-950 dark:from-slate-950 dark:to-cyan-950 py-16 md:py-24">
         <div className="container mx-auto px-4 text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-semibold text-white">
-            Ready to preserve your organisation's knowledge?
+            Ready to unlock your organisation's collective knowledge?
           </h2>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            Join student organisations using Unify to maintain institutional memory
-            across leadership changes.
+            Join organisations using Unify to eliminate knowledge loss, reduce time spent searching, and make better decisions based on institutional memory.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
@@ -289,7 +275,7 @@ export default function AboutPage() {
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            © {new Date().getFullYear()} Unify. Built for student organisations.
+            © {new Date().getFullYear()} Unify. All rights reserved.
           </p>
         </div>
       </footer>

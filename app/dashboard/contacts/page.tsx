@@ -27,10 +27,13 @@ import {
   GraduationCap,
   Users as UsersIcon,
 } from 'lucide-react';
+import { useOrganisation } from '@/lib/contexts/OrganisationContext';
 import { mockContacts } from '@/lib/mockData';
 
 export default function ContactsPage() {
-  const [contacts, setContacts] = useState(mockContacts);
+  const { currentOrganisation } = useOrganisation();
+  const showDemoData = currentOrganisation?.name === 'TCD MSA';
+  const [contacts, setContacts] = useState(showDemoData ? mockContacts : []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedContact, setSelectedContact] = useState<typeof mockContacts[0] | null>(null);
@@ -88,6 +91,16 @@ export default function ContactsPage() {
           Add Contact
         </Button>
       </div>
+
+      {!showDemoData && contacts.length === 0 && (
+        <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="pt-6">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              No contacts yet. Connect your data sources and sync to see contacts from your organisation's communications.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search and Filters */}
       <div className="flex gap-4">

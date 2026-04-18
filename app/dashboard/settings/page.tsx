@@ -406,8 +406,8 @@ export default function SettingsPage() {
                 <Badge variant="secondary">Coming Soon</Badge>
               </div>
 
-              {/* Slack - Coming Soon */}
-              <div className="flex items-center justify-between p-4 border rounded-lg opacity-60">
+              {/* Slack */}
+              <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded bg-purple-50 dark:bg-purple-950 flex items-center justify-center">
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -419,10 +419,13 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <p className="font-medium">Slack</p>
-                    <p className="text-sm text-slate-500">Coming soon - Channel messages</p>
+                    <p className="text-sm text-slate-500">Import messages and channels from Slack</p>
                   </div>
                 </div>
-                <Badge variant="secondary">Coming Soon</Badge>
+                <Button variant="outline" size="sm">
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Connect
+                </Button>
               </div>
             </CardContent>
           </Card>

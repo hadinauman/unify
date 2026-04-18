@@ -80,8 +80,9 @@ function OnboardingContent() {
 
       const organisation = await response.json();
 
-      // Save organisation ID to localStorage for dashboard context
+      // Save full organisation data to localStorage for immediate dashboard context
       localStorage.setItem('currentOrganisationId', organisation.id);
+      localStorage.setItem('currentOrganisation', JSON.stringify(organisation));
 
       // Redirect to connect or dashboard
       router.push('/connect');
@@ -234,7 +235,7 @@ function OnboardingContent() {
               )}
 
               <div>
-                <Label htmlFor="yourRole">Your Committee Role</Label>
+                <Label htmlFor="yourRole">Your Role</Label>
                 <Select
                   value={formData.yourRole}
                   onValueChange={(value) =>
@@ -247,7 +248,7 @@ function OnboardingContent() {
                   </SelectTrigger>
                   <SelectContent>
                     {signupType === 'organisation' && (
-                      <SelectItem value="president">President</SelectItem>
+                      <SelectItem value="president">President/Chairperson</SelectItem>
                     )}
                     {signupType === 'member' && (
                       <>
@@ -263,13 +264,13 @@ function OnboardingContent() {
                 </Select>
                 {signupType === 'organisation' && (
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    As organisation creator, you are automatically assigned as President
+                    As organisation creator, you are automatically assigned as President/Chairperson
                   </p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="committeeYear">Committee Year</Label>
+                <Label htmlFor="committeeYear">Year</Label>
                 <Input
                   id="committeeYear"
                   placeholder="2025-2026"

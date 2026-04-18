@@ -10,19 +10,46 @@ export interface OrganisationPreset {
 }
 
 export const organisationPresets: Record<OrganisationType, OrganisationPreset> = {
+  'nonprofit': {
+    displayName: 'Nonprofit Organisation',
+    description: 'Charitable organisations and NGOs',
+    icon: '',
+    terminology: {
+      teamLabel: 'Team',
+      memberLabel: 'Staff Member',
+      leaderLabel: 'Executive Director/Chairperson',
+      eventLabel: 'Programme',
+      periodLabel: 'Year',
+    },
+    defaultRoles: [
+      'Executive Director/Chairperson',
+      'Programme Director',
+      'Development Director',
+      'Volunteer Co-ordinator',
+      'Grant Writer',
+    ],
+    eventTypes: [
+      'fundraiser',
+      'programme',
+      'outreach',
+      'volunteer-event',
+      'gala',
+    ],
+  },
+
   'student-isoc-msa': {
     displayName: 'Student Society',
     description: 'Student clubs and societies (including ISocs, MSAs, and general clubs)',
-    icon: '🎓',
+    icon: '',
     terminology: {
       teamLabel: 'Committee',
       memberLabel: 'Member',
-      leaderLabel: 'President',
+      leaderLabel: 'President/Chairperson',
       eventLabel: 'Event',
       periodLabel: 'Academic Year',
     },
     defaultRoles: [
-      'President',
+      'President/Chairperson',
       'Vice President',
       'Treasurer',
       'Secretary',
@@ -33,7 +60,6 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
     eventTypes: [
       'social',
       'educational',
-      'religious',
       'fundraiser',
       'outreach',
       'competition',
@@ -41,41 +67,14 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
     ],
   },
 
-  'student-society': {
-    displayName: 'Student Society',
-    description: 'General student clubs and societies',
-    icon: '🎓',
-    terminology: {
-      teamLabel: 'Committee',
-      memberLabel: 'Member',
-      leaderLabel: 'President',
-      eventLabel: 'Event',
-      periodLabel: 'Academic Year',
-    },
-    defaultRoles: [
-      'President',
-      'Vice President',
-      'Treasurer',
-      'Secretary',
-      'Events Officer',
-    ],
-    eventTypes: [
-      'social',
-      'educational',
-      'fundraiser',
-      'competition',
-      'meeting',
-    ],
-  },
-
   'consulting-firm': {
     displayName: 'Consulting Firm',
     description: 'Professional services and consulting companies',
-    icon: '💼',
+    icon: '',
     terminology: {
       teamLabel: 'Team',
       memberLabel: 'Consultant',
-      leaderLabel: 'Partner',
+      leaderLabel: 'Partner/Chairperson',
       eventLabel: 'Project',
       periodLabel: 'Fiscal Year',
     },
@@ -96,19 +95,99 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
     ],
   },
 
+  'creative-agency': {
+    displayName: 'Creative Agency',
+    description: 'Design, development, and creative studios',
+    icon: '',
+    terminology: {
+      teamLabel: 'Studio',
+      memberLabel: 'Creative',
+      leaderLabel: 'Creative Director/Chairperson',
+      eventLabel: 'Project',
+      periodLabel: 'Year',
+    },
+    defaultRoles: [
+      'Creative Director/Chairperson',
+      'Lead Designer',
+      'Designer',
+      'Developer',
+      'Project Manager',
+    ],
+    eventTypes: [
+      'project',
+      'client-delivery',
+      'pitch',
+      'workshop',
+      'design-sprint',
+    ],
+  },
+
+  'sales-team': {
+    displayName: 'Sales Organisation',
+    description: 'Sales departments and teams',
+    icon: '',
+    terminology: {
+      teamLabel: 'Team',
+      memberLabel: 'Sales Representative',
+      leaderLabel: 'Sales Manager/Chairperson',
+      eventLabel: 'Campaign',
+      periodLabel: 'Quarter',
+    },
+    defaultRoles: [
+      'Sales Manager/Chairperson',
+      'Account Executive',
+      'Sales Representative',
+      'Business Development Manager',
+    ],
+    eventTypes: [
+      'campaign',
+      'client-meeting',
+      'pitch',
+      'training',
+      'conference',
+    ],
+  },
+
+  'student-society': {
+    displayName: 'Student Society',
+    description: 'General student clubs and societies',
+    icon: '',
+    terminology: {
+      teamLabel: 'Committee',
+      memberLabel: 'Member',
+      leaderLabel: 'President/Chairperson',
+      eventLabel: 'Event',
+      periodLabel: 'Academic Year',
+    },
+    defaultRoles: [
+      'President/Chairperson',
+      'Vice President',
+      'Treasurer',
+      'Secretary',
+      'Events Officer',
+    ],
+    eventTypes: [
+      'social',
+      'educational',
+      'fundraiser',
+      'competition',
+      'meeting',
+    ],
+  },
+
   'marketing-agency': {
     displayName: 'Marketing/Creative Agency',
     description: 'Advertising, marketing, and creative agencies',
-    icon: '📢',
+    icon: '',
     terminology: {
       teamLabel: 'Team',
       memberLabel: 'Team Member',
-      leaderLabel: 'Creative Director',
+      leaderLabel: 'Creative Director/Chairperson',
       eventLabel: 'Campaign',
       periodLabel: 'Year',
     },
     defaultRoles: [
-      'Creative Director',
+      'Creative Director/Chairperson',
       'Account Manager',
       'Copywriter',
       'Designer',
@@ -124,64 +203,10 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
     ],
   },
 
-  'creative-agency': {
-    displayName: 'Creative Agency',
-    description: 'Design, development, and creative studios',
-    icon: '🎨',
-    terminology: {
-      teamLabel: 'Studio',
-      memberLabel: 'Creative',
-      leaderLabel: 'Creative Director',
-      eventLabel: 'Project',
-      periodLabel: 'Year',
-    },
-    defaultRoles: [
-      'Creative Director',
-      'Lead Designer',
-      'Designer',
-      'Developer',
-      'Project Manager',
-    ],
-    eventTypes: [
-      'project',
-      'client-delivery',
-      'pitch',
-      'workshop',
-      'design-sprint',
-    ],
-  },
-
-  'nonprofit': {
-    displayName: 'Nonprofit Organisation',
-    description: 'Charitable organisations and NGOs',
-    icon: '❤️',
-    terminology: {
-      teamLabel: 'Team',
-      memberLabel: 'Staff Member',
-      leaderLabel: 'Executive Director',
-      eventLabel: 'Programme',
-      periodLabel: 'Year',
-    },
-    defaultRoles: [
-      'Executive Director',
-      'Programme Director',
-      'Development Director',
-      'Volunteer Co-ordinator',
-      'Grant Writer',
-    ],
-    eventTypes: [
-      'fundraiser',
-      'programme',
-      'outreach',
-      'volunteer-event',
-      'gala',
-    ],
-  },
-
   'restaurant': {
     displayName: 'Restaurant/Hospitality',
     description: 'Restaurants, cafes, and hospitality businesses',
-    icon: '🍽️',
+    icon: '',
     terminology: {
       teamLabel: 'Staff',
       memberLabel: 'Staff Member',
@@ -209,7 +234,7 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
   'retail-store': {
     displayName: 'Retail Store',
     description: 'Retail shops and boutiques',
-    icon: '🛍️',
+    icon: '',
     terminology: {
       teamLabel: 'Team',
       memberLabel: 'Staff Member',
@@ -236,7 +261,7 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
   'franchise': {
     displayName: 'Franchise Network',
     description: 'Franchise businesses and networks',
-    icon: '🏢',
+    icon: '',
     terminology: {
       teamLabel: 'Network',
       memberLabel: 'Franchisee',
@@ -258,44 +283,18 @@ export const organisationPresets: Record<OrganisationType, OrganisationPreset> =
     ],
   },
 
-  'sales-team': {
-    displayName: 'Sales Organisation',
-    description: 'Sales departments and teams',
-    icon: '📈',
-    terminology: {
-      teamLabel: 'Team',
-      memberLabel: 'Sales Representative',
-      leaderLabel: 'Sales Manager',
-      eventLabel: 'Campaign',
-      periodLabel: 'Quarter',
-    },
-    defaultRoles: [
-      'Sales Manager',
-      'Account Executive',
-      'Sales Representative',
-      'Business Development Manager',
-    ],
-    eventTypes: [
-      'campaign',
-      'client-meeting',
-      'pitch',
-      'training',
-      'conference',
-    ],
-  },
-
   'other': {
     displayName: 'Other Organisation',
     description: 'Generic organisation type',
-    icon: '🏛️',
+    icon: '',
     terminology: {
       teamLabel: 'Team',
       memberLabel: 'Member',
-      leaderLabel: 'Leader',
+      leaderLabel: 'Leader/Chairperson',
       eventLabel: 'Event',
       periodLabel: 'Year',
     },
-    defaultRoles: ['Leader', 'Member'],
+    defaultRoles: ['Leader/Chairperson', 'Member'],
     eventTypes: ['event', 'meeting', 'project'],
   },
 };

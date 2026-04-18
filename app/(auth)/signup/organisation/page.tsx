@@ -9,7 +9,7 @@ export default function SignUpOrganisationPage() {
             Create Your Organisation
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Sign up as President to create a new organisation on Unify
+            Sign up as President/Chairperson to create a new organisation on Unify
           </p>
         </div>
 
@@ -27,7 +27,7 @@ export default function SignUpOrganisationPage() {
         />
 
         <p className="text-sm text-center text-slate-500 dark:text-slate-400 mt-6">
-          As President, you'll have full administrative access to manage your organisation.
+          As President/Chairperson, you'll have full administrative access to manage your organisation.
         </p>
       </div>
     </div>
